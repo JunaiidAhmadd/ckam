@@ -1,0 +1,28 @@
+.tabs-scroll {
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
+.tabs-scroll .nav {
+  flex-wrap: nowrap !important;   /* 🔥 force no wrap */
+  display: flex;
+}
+
+.tabs-scroll .nav-item {
+  flex: 0 0 auto;                /* 🔥 prevent shrinking */
+}
+
+.tabs-scroll .nav-link {
+  white-space: nowrap;
+  padding: 10px 16px;
+  font-size: 14px;
+}
+
+/* optional - better mobile spacing */
+@media (max-width: 576px) {
+  .tabs-scroll .nav-link {
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+}

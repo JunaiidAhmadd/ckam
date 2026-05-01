@@ -1,0 +1,923 @@
+{
+  "header": {
+    "nav": {
+      "home": "Home",
+      "home_one": "Home One",
+      "home_two": "Home Two",
+      "home_three": "Home Three",
+      "about_us": "About Us",
+      "services": "Services",
+      "pricing": "Pricing",
+      "service_style_one": "Service Style One",
+      "service_style_two": "Service Style Two",
+      "single_service": "Single Service",
+      "shop": "Shop",
+      "shop_grid": "Shop Grid",
+      "shop_left_sidebar": "Shop Left Sidebar",
+      "shop_right_sidebar": "Shop Right Sidebar",
+      "single_product": "Single Product",
+      "cart": "Cart",
+      "wishlist": "Wishlist",
+      "checkout": "Checkout",
+      "user_pages": "User Pages",
+      "login": "Login",
+      "register": "Register",
+      "my_account": "My Account",
+      "recover_password": "Recover Password",
+      "pages": "Pages",
+      "projects": "Projects",
+      "project": "Project",
+      "single_project": "Single Project",
+      "team": "Our Team",
+      "pricing_table": "Pricing Table",
+      "faq": "FAQ",
+      "testimonials": "Testimonials",
+      "terms_of_service": "Terms of Service",
+      "privacy_policy": "Privacy Policy",
+      "404_error_page": "404 Error Page",
+      "blog": "Blog",
+      "blog_layout": "Blog Layout",
+      "blog_grid": "Blog Grid",
+      "blog_left_sidebar": "Blog Left Sidebar",
+      "blog_right_sidebar": "Blog Right Sidebar",
+      "single_blog": "Single Blog",
+      "blog_details_no_sidebar": "Blog Details No Sidebar",
+      "blog_details_left_sidebar": "Blog Details Left Sidebar",
+      "blog_details_right_sidebar": "Blog Details Right Sidebar",
+      "contact_us": "Contact Us",
+      "book_now": "BOOK NOW",
+      "features": "Features",
+      "blogs": "Blogs"
+    }
+  },
+  "footer": {
+    "quick_links": "Quick Links",
+    "our_services": "Our Services",
+    "wedding_photography": "Wedding Photography",
+    "portrait_photography": "Portrait Photography",
+    "event_photography": "Event Photography",
+    "videography_services": "Videography Services",
+    "contact_us": "Contact Us",
+    "newsletter_text": "Subscribe to our newsletter for discounts and more latest offer.",
+    "email_placeholder": "Enter Your Email",
+    "subscribe_now": "SUBSCRIBE NOW",
+    "follow_instagram": "Follow Instagram",
+    "address": "5961 De Santa Ave, Huntington Park, CA 90255, USA",
+    "copyright": "Povi. All Rights Reserved By HiBootstrap"
+  },
+  "index": {
+    "title": "Povi - Photography & Videography Services HTML Template",
+    "hero": {
+      "subtitle": "PROFESSIONAL PHOTOGRAPHY SERVICES",
+      "title": "Capture Love, Joy & Everything With Us",
+      "description": "It is a long established fact that a reader will be distracted by the reale he point of using Lorem Ipsum is that it has a more-or-less normal valid.",
+      "get_started": "GET STARTED"
+    },
+    "features": {
+      "title": "WHY CHOOSE US",
+      "subtitle": "We Are Different & Professional",
+      "professional_photos": "Professional Photos",
+      "professional_photos_desc": "Lorem ipsum dolor sit ametco nsectetur adipiscing elit.",
+      "expert_team": "Expert Team",
+      "expert_team_desc": "Lorem ipsum dolor sit ametco nsectetur adipiscing elit.",
+      "affordable_price": "Affordable Price",
+      "affordable_price_desc": "Lorem ipsum dolor sit ametco nsectetur adipiscing elit.",
+      "24_support": "24/7 Support",
+      "24_support_desc": "Lorem ipsum dolor sit ametco nsectetur adipiscing elit."
+    },
+    "about": {
+      "tag": "ABOUT US",
+      "title": "We're The Leading Photo Studio In The Country",
+      "description": "Best Strategic planning dolor sit amet consectetur adipiscing elit. Scel erus isque ametus odio velit auctor nam elit nulla eget sodales dui pulvinar dolor strategic planning dolor sit sectetur.",
+      "feature_1": "Lorem ipsum is not simply random text",
+      "feature_2": "Making this the first true generator on the internet",
+      "feature_3": "various version have evolved these years",
+      "learn_more": "LEARN MORE"
+    },
+    "services": {
+      "tag": "OUR SERVICES",
+      "title": "We Provide Best Services",
+      "item_1": "Woman Portrait",
+      "item_2": "Children Portrait",
+      "item_3": "Man Portrait",
+      "item_4": "Couple Moment",
+      "view_more": "VIEW MORE"
+    },
+    "cta": {
+      "title": "Need Help Let's Work Together",
+      "description": "Lorem ipsum dolor sit amet consectetur adipisicing elit. Digni assimos odit quib usdam quis maiores, ipsa ullam sunt ab doloremque officiis minima!"
+    },
+    "contact": {
+      "tag": "GET IN TOUCH",
+      "title": "Still Have A Questions?",
+      "send_message": "SEND MESSAGE"
+    },
+    "sections": {
+      "growth": {
+        "title": "Your destination to grow your business",
+        "point_1": "Client database",
+        "point_2": "Account management",
+        "point_3": "Online payments",
+        "point_4": "Client gallery",
+        "cta": "Subscribe for free now"
+      },
+      "provide": {
+        "title": "What do we provide?",
+        "item_1": "Private showcase page for your work",
+        "item_2": "Online payment gateway",
+        "item_3": "Build your client database",
+        "item_4": "Schedule studio sessions",
+        "item_5": "Private client photo gallery",
+        "nav_home": "Home",
+        "nav_services": "Services",
+        "nav_gallery": "Gallery",
+        "nav_about": "About",
+        "nav_contact": "Contact",
+        "preview_cta": "Book now"
+      },
+      "how": {
+        "title": "How can C-KAM help you?",
+        "subtitle": "Our goal is to help you create a smooth and premium experience for you and your clients.",
+        "card_1": "Start selling while focused on clients",
+        "card_2": "Protect your rights and client payment rights",
+        "card_3": "Earn client respect with pro management",
+        "card_4": "Develop your relationship with every client",
+        "card_5": "Track costs and study your profits",
+        "card_6": "Get more time for creativity",
+        "more": "More"
+      },
+      "testimonials": {
+        "title": "Subscriber Reviews",
+        "quote_1": "I benefited greatly from the platform. Work became smoother and my clients loved the experience.",
+        "author_1": "Salman Salem",
+        "quote_2": "Now everything is organized in one place. Booking and delivery became much easier.",
+        "author_2": "Reem Khaled",
+        "cta": "Subscribe for free now"
+      },
+      "faq": {
+        "title": "Frequently Asked Questions",
+        "q1": {
+          "question": "Is there a free plan to start?",
+          "answer": "Yes. You can start for free and upgrade later when your business needs more advanced tools."
+        },
+        "q2": {
+          "question": "Can I use Arabic and English together?",
+          "answer": "Absolutely. The platform supports bilingual content and RTL/LTR layouts for a smooth client experience."
+        },
+        "q3": {
+          "question": "Does online payment work securely?",
+          "answer": "Yes. Payments are handled through secure providers with protected checkout and transaction records."
+        },
+        "q4": {
+          "question": "Can clients choose time slots directly?",
+          "answer": "Yes. Your clients can pick available sessions, and you can manage schedule updates from one place."
+        }
+      }
+    }
+  },
+  "booking": {
+    "title": "Photographer Booking",
+    "breadcrumb": {
+      "title": "Book Now",
+      "home": "Home",
+      "current": "Book Now"
+    },
+    "page_title": "Professional Photography Session",
+    "price": "Starting at $299",
+    "description": "Book your professional photography session with our experienced team. We capture your precious moments with creativity and expertise, ensuring stunning results that you'll cherish forever.",
+    "description2": "Our professional photography services include wedding photography, portrait sessions, event coverage, commercial photography, and videography services. Each session is tailored to your specific needs and vision.",
+    "session_duration": "Session Duration",
+    "service_type": "Service Type",
+    "wedding_photography": "Wedding Photography",
+    "portrait_photography": "Portrait Photography",
+    "event_photography": "Event Photography",
+    "commercial_photography": "Commercial Photography",
+    "videography_services": "Videography Services",
+    "booking_information": "Booking Information",
+    "first_name": "First Name",
+    "last_name": "Last Name",
+    "email_address": "Email Address",
+    "phone_number": "Phone Number",
+    "location": "Location",
+    "additional_details": "Additional Details...",
+    "book_now": "Book Now",
+    "related_services": "Related Services",
+    "starting_at": "Starting at",
+    "hero": {
+      "title": "Capturing your story with natural light & timeless edits",
+      "description": "A premium booking experience that looks like the photographer's own website - with brand area, services, contact info, social links, and a professional booking flow.",
+      "book_session": "Book a Session",
+      "explore_services": "Explore Services",
+      "brand_name": "John Doe Photography",
+      "specialties": "Portrait · Family · Events"
+    },
+    "contact": {
+      "title": "Contact",
+      "location": "Manama, Bahrain"
+    },
+    "banner": {
+      "title": "A premium experience, from inquiry to delivery",
+      "description": "Use this area for promotions, seasonal mini sessions, or a signature offer - it's a full-width banner that looks like a real photographer website.",
+      "cta": "Reserve Your Slot"
+    },
+    "services": {
+      "title": "Services",
+      "description": "This section is controlled from the dashboard later. For now, it visually communicates the photographer's brand and offerings - not just \"instant booking\".",
+      "cards": {
+        "portrait": {
+          "badge": "Popular",
+          "title": "Portrait Session",
+          "line1": "Natural light portraits with premium retouching.",
+          "line2": "Studio or outdoor setup included."
+        },
+        "family": {
+          "badge": "Best Seller",
+          "title": "Family Session",
+          "line1": "Lifestyle storytelling for families and kids.",
+          "line2": "Includes guidance and edited gallery."
+        },
+        "engagement": {
+          "badge": "Couples",
+          "title": "Engagement",
+          "line1": "Story-driven pre-wedding and proposal captures.",
+          "line2": "Creative moodboard support included."
+        },
+        "events": {
+          "badge": "Premium",
+          "title": "Events",
+          "line1": "Full event coverage for private and brand events.",
+          "line2": "Fast highlights delivery available."
+        }
+      }
+    },
+    "about": {
+      "title": "About the Photographer",
+      "description": "Hi, I'm John. I focus on authentic, minimal posing and clean color. The booking flow below is designed to feel like your own website so clients trust the brand before they book.",
+      "experience_label": "Experience",
+      "experience_value": "8+ years",
+      "style_label": "Style",
+      "style_value": "Natural light",
+      "start_booking": "Start Booking",
+      "view_galleries": "View Galleries"
+    },
+    "booking": {
+      "title": "Book your session",
+      "description": "This is a premium booking area while keeping the same core form fields and future dashboard-driven content.",
+      "select_session": "Select Session Type",
+      "sessions": {
+        "portrait": {
+          "title": "Portrait Session",
+          "badge": "Popular",
+          "duration": "60 minute session",
+          "meta": "10 edited photos"
+        },
+        "family": {
+          "title": "Family Session",
+          "badge": "Lifestyle",
+          "duration": "90 minute session",
+          "meta": "Up to 5 people"
+        },
+        "event": {
+          "title": "Event Coverage",
+          "badge": "Pro",
+          "duration": "2 hour coverage",
+          "meta": "Highlights + gallery"
+        }
+      },
+      "select_date": "Select Date",
+      "available_time": "Available Time",
+      "your_information": "Your Information",
+      "form": {
+        "first_name": "First Name",
+        "last_name": "Last Name",
+        "email": "Email",
+        "phone": "Phone",
+        "notes": "Notes",
+        "confirm": "Confirm Booking"
+      }
+    },
+    "reviews": {
+      "kicker": "Client Stories",
+      "title": "Reviews",
+      "verified": "Verified review",
+      "review1": "Amazing photographer! Highly recommended.",
+      "review2": "Very professional and the photos exceeded expectations.",
+      "client1_name": "Sarah Ahmed",
+      "client2_name": "Ali Hassan"
+    }
+  },
+  "contact": {
+    "title": "Contact - Povi Photography & Videography Services HTML Template",
+    "breadcrumb": {
+      "title": "Contact Us",
+      "home": "Home",
+      "current": "Contact Us"
+    },
+    "page_title": "Get In Touch With Us",
+    "subtitle": "Contact Us",
+    "description": "Feel free to contact us any time. We will get back to you as soon as we can!",
+    "follow_us": "Follow Us:",
+    "form": {
+      "name": "Name",
+      "email": "Email",
+      "subject": "Subject",
+      "message": "Message",
+      "agree_html": "I agree to the <a class=\"link style1\" href=\"terms-of-service.html\">terms &amp; conditions</a> and <a class=\"link style1\" href=\"privacy-policy.html\">privacy policy</a>",
+      "terms_conditions": "terms &amp; conditions",
+      "privacy_policy": "privacy policy",
+      "send_message": "Send Message",
+      "success": "Your message has been sent successfully."
+    },
+    "info": {
+      "address": "Address",
+      "phone": "Phone",
+      "email": "Email"
+    }
+  },
+  "login": {
+    "title": "Login - Povi Photography & Videography Services HTML Template",
+    "page_title": "Login To Your Account",
+    "subtitle": "Login",
+    "description": "Login to access your account and manage your bookings.",
+    "email": "Email Address",
+    "password": "Password",
+    "remember_me": "Remember Me",
+    "forgot_password": "Forgot Password?",
+    "login_button": "Login",
+    "no_account": "Don't have an account?",
+    "register_now": "Register Now",
+    "breadcrumb": {
+      "title": "Login",
+      "home": "Home",
+      "current": "Login"
+    },
+    "form": {
+      "title": "Login",
+      "username_or_email": "Username Or Email Address",
+      "password": "Password",
+      "remember_me": "Remember Me",
+      "forgot_password": "Forgot Password?",
+      "login_now": "LOGIN NOW",
+      "google_login": "Continue with Google",
+      "no_account": "Don’t Have an Account?",
+      "create_one": "Create One"
+    }
+  },
+  "register": {
+    "title": "Register - Povi Photography & Videography Services HTML Template",
+    "page_title": "Create New Account",
+    "subtitle": "Register",
+    "description": "Create a new account to book our services and manage your bookings.",
+    "first_name": "First Name",
+    "last_name": "Last Name",
+    "email": "Email Address",
+    "phone": "Phone Number",
+    "password": "Password",
+    "confirm_password": "Confirm Password",
+    "register_button": "Register",
+    "have_account": "Already have an account?",
+    "login_now": "Login Now",
+    "breadcrumb": {
+      "title": "Register",
+      "home": "Home",
+      "current": "Register"
+    },
+    "form": {
+      "title": "Register",
+      "first_name": "First Name",
+      "last_name": "Last Name",
+      "phone": "Phone Number",
+      "email": "Email Address",
+      "password": "Password",
+      "confirm_password": "Confirm Password",
+      "agree_html": "I Agree with the <a class=\"link style1\" href=\"terms-of-service.html\">Terms &amp; conditions</a>",
+      "register_now": "REGISTER NOW",
+      "have_account": "Have an Account?",
+      "sign_in": "Sign In"
+    }
+  },
+  "verify_email": {
+    "title": "Verify Email - Povi",
+    "breadcrumb": {
+      "title": "Verify Email",
+      "home": "Home",
+      "current": "Verify Email"
+    },
+    "form": {
+      "title": "Enter Verification Code",
+      "description": "We have sent a 6-digit code to your email. Please enter it below to continue.",
+      "email": "Email Address",
+      "code": "Verification Code",
+      "confirm": "Confirm",
+      "resend": "Resend Code",
+      "back_to_login": "Back to Login"
+    }
+  },
+  "forgot_password": {
+    "title": "Forgot Password - Povi",
+    "breadcrumb": {
+      "title": "Forgot Password",
+      "home": "Home",
+      "current": "Forgot Password"
+    },
+    "form": {
+      "title": "Reset Your Password",
+      "step1_description": "Enter your email address. We will send a verification code.",
+      "step2_description": "Enter the 6-digit code sent to your email.",
+      "step3_description": "Set a new password for your account.",
+      "email": "Email Address",
+      "send_code": "Send Code",
+      "code": "Verification Code",
+      "verify_code": "Verify Code",
+      "new_password": "New Password",
+      "confirm_password": "Confirm Password",
+      "reset_password": "Reset Password",
+      "back_to_login": "Back to Login"
+    }
+  },
+  "service_one": {
+    "title": "Services - Povi Photography & Videography Services HTML Template",
+    "breadcrumb": {
+      "title": "Services",
+      "home": "Home",
+      "current": "Services"
+    },
+    "page_title": "Our Professional Services",
+    "subtitle": "Services",
+    "description": "We offer professional photography and videography services tailored to your needs.",
+    "view_more": "VIEW MORE",
+    "load_more": "LOAD MORE",
+    "items": {
+      "woman_portrait": "Woman Portrait",
+      "children_portrait": "Children Portrait",
+      "man_portrait": "Man Portrait",
+      "couple_moment": "Couple Moment",
+      "film_production": "Film & Production",
+      "studio_sessions": "Studio Sessions",
+      "retouch_photo": "Retouch Photo"
+    }
+  },
+  "service_details": {
+    "title": "Service Details - Povi Photography & Videography Services HTML Template",
+    "breadcrumb": {
+      "title": "Service Details",
+      "home": "Home",
+      "services": "Services",
+      "current": "Service Details"
+    },
+    "section1": {
+      "title": "We Provide The Best Woman Portrait",
+      "p1": "Lorem ipsum dolor sit amet, cons ectetur adipi scing elit. Cura bitur vulp utate vesti bulum biben dum. Phasel honcus dolor ego viverra pretium, dolor tellus aliquet nunc, vitae ultricies erat elit eu lacus. Vestibulum non justo consectetur cursus ante tincidu sapien .",
+      "p2": "Lorem ipsum dolor sit amet, cons ectetur adipi scing elit. Cura bitur vulp utate vesti bulum biben dum. Phasel honcus dolor ego viverra pretiumd tellus aliquet nunc vitae ultricies erat elit eu lacus. Vestib ulum non justos consec cursus ante tincidu sapien orem ipsum aliquet nunc, vitae ultricies erat elit eu lacus.",
+      "p3": "Lorem ipsum dolor sit amet, cons ectetur adipi scing elit. Cura bitur vulp utate vesti bulum biben dum. Phasel honcus dolor ego viverra pretiumd tellus aliquet nunc, vitae ultricies erat."
+    },
+    "section2": {
+      "title": "Innovation Of Photography & Videography With Drones",
+      "p1": "Lorem ipsum dolor sit amet consectetur adipisicing elit. Consequuntur error distinctio quas autem tenetur.",
+      "list1": "Bribed Autor Nisi Elit Volume",
+      "list2": "Cost of Supplies and Equipment",
+      "list3": "Easy to Customer Services",
+      "list4": "Good Quality Products Services"
+    },
+    "section3": {
+      "title": "Real Memories Capture With Drones",
+      "p1": "Lorem ipsum dolor sit amet consectetur adipisicing elit. Consequuntur error distin quas autem tenetur! Voluptatum soluta, quis qui necessit.",
+      "list1": "Bribed Autor Nisi Elit Volume",
+      "list2": "Cost of Supplies and Equipment",
+      "list3": "Easy to Customer Services"
+    },
+    "book_now": "BOOK NOW",
+    "pricing": {
+      "tag": "OUR PRICING",
+      "title": "Choose Your Packages"
+    },
+    "cta": {
+      "title": "Get Your Best Picture From Our Shot",
+      "description": "Lorem ipsum dolor sit amet, cons ectetur adipi scing elit cura bitur vulp utate vesti bulum biben dum.",
+      "contact_us": "Contact Us"
+    }
+  },
+  "pricing_plan": {
+    "title": "Pricing - Povi Photography & Videography Services HTML Template",
+    "breadcrumb": {
+      "title": "Pricing Table",
+      "home": "Home",
+      "current": "Pricing Table"
+    },
+    "page_title": "Our Pricing Plans",
+    "subtitle": "Pricing Table",
+    "description": "Choose the perfect pricing plan for your photography needs.",
+    "per_month": "/Month",
+    "purchase_now": "PURCHASE NOW",
+    "packages": {
+      "basic": {
+        "name": "Basic Package",
+        "features": {
+          "f1": "1 Hour Session",
+          "f2": "10 Digital Images",
+          "f3": "Online Gallery",
+          "f4": "1 Photographer"
+        }
+      },
+      "premium": {
+        "name": "Premium Package",
+        "features": {
+          "f1": "2 Hour Session",
+          "f2": "20 Digital Images",
+          "f3": "Online Gallery",
+          "f4": "2 Photographer"
+        }
+      },
+      "professional": {
+        "name": "Professional Package",
+        "features": {
+          "f1": "3 Hour Session",
+          "f2": "30 Digital Images",
+          "f3": "Online Gallery",
+          "f4": "4 Photographer"
+        }
+      }
+    },
+    "pro": {
+      "badge": "Recommended",
+      "title": "Pro Plan",
+      "subtitle": "One complete plan for photographers to manage bookings, clients, delivery, payments, and daily workflow.",
+      "trial_highlight": "14-day free trial - no setup fees, cancel anytime.",
+      "monthly_label": "Monthly",
+      "yearly_label": "Yearly",
+      "period_monthly": "/ month",
+      "period_yearly": "/ year",
+      "save_monthly": "Save 20% with yearly billing",
+      "save_yearly": "You save $94 compared to monthly",
+      "cta": "Start Free Trial",
+      "features": {
+        "f1": "Public profile / booking page",
+        "f2": "Public page builder (sections + galleries + reviews)",
+        "f3": "Services (add/edit/delete)",
+        "f4": "Services Active/Inactive toggle",
+        "f5": "Clients (list + profile pages)",
+        "f6": "Tasks (notes + attachments + activity)",
+        "f7": "Booking settings (availability + statuses)",
+        "f8": "Online payments (Tap)",
+        "f9": "Preferences (language + currency)",
+        "f10": "Support level"
+      },
+      "point_1": "No setup fees or hidden costs",
+      "point_2": "Priority support for your workflow",
+      "secondary_cta": "View Features",
+      "panel_title": "Everything included in one plan",
+      "panel_subtitle": "All core tools are active from day one.",
+      "chip_1": "Cancel anytime",
+      "chip_2": "Bilingual ready (EN/AR)",
+      "chip_3": "Professional booking flow"
+    }
+  },
+  "features_page": {
+    "title": "Features - Povi",
+    "hero": {
+      "title": "Elevate your client experience",
+      "subtitle": "Our goal in C-KAM is to help you create a premium and easy experience for you and your client.",
+      "cta": "Subscribe for free now",
+      "welcome": "Welcome to C-KAM",
+      "who_are_you": "Who are you?",
+      "photographer": "Photographer",
+      "client": "Client",
+      "menu_home": "Home",
+      "menu_services": "Services",
+      "menu_gallery": "Gallery",
+      "menu_contact": "Contact"
+    },
+    "journey": {
+      "title": "Features that serve every stage of your work",
+      "submit": "SUBMIT",
+      "by_line": "BY SANDER DESIGN",
+      "cta": "Subscribe for free now",
+      "tabs": {
+        "private_showcase": "Your portfolio page",
+        "booking_flow": "Scheduling and booking",
+        "delivery_contact": "Delivery and communication",
+        "session_feedback": "Session feedback",
+        "project_tracking": "Track your project"
+      },
+      "side": {
+        "project_tracking": "Track your project",
+        "live_reports": "Get continuous reports<br>and statistics",
+        "client_database": "Client database<br>page",
+        "auto_delivery": "Automated periodic<br>delivery to clients",
+        "expense_log": "Log your expenses",
+        "project_calculator": "Project calculator"
+      },
+      "board": {
+        "private_showcase_title": "Private Showcase",
+        "private_showcase_subtitle": "Show your work professionally to boost client trust.",
+        "booking_flow_title": "Booking Flow",
+        "booking_flow_subtitle": "Manage your schedule and bookings easily from one place.",
+        "delivery_contact_title": "Delivery & Communication",
+        "delivery_contact_subtitle": "Organized communication and delivery that saves time.",
+        "session_feedback_title": "Session Feedback",
+        "session_feedback_subtitle": "Know where your client evolves and win more clients.",
+        "project_tracking_title": "Project Tracking",
+        "project_tracking_subtitle": "Track every step in your project with clear reports.",
+        "live_reports_title": "Live Reports",
+        "live_reports_subtitle": "Get ongoing reports and statistics.",
+        "client_database_title": "Client Database",
+        "client_database_subtitle": "A complete page with your client data.",
+        "auto_delivery_title": "Auto Delivery",
+        "auto_delivery_subtitle": "Automate recurring delivery updates for clients.",
+        "expense_log_title": "Expense Log",
+        "expense_log_subtitle": "Record your expenses in an organized way.",
+        "project_calculator_title": "Project Calculator",
+        "project_calculator_subtitle": "Calculate your project quickly and accurately."
+      }
+    },
+    "flow": {
+      "title": "The easiest way to communicate with your client",
+      "you": "You",
+      "client": "Client",
+      "card_top": "Bookings",
+      "card_mid": "Session photos - Session feedback",
+      "phone_title": "Thank you, Peter!",
+      "phone_sub": "Let's create<br>something special",
+      "cta": "Start now"
+    },
+    "fields": {
+      "title": "For photographers in every niche",
+      "subtitle": "Whatever your niche is, C-KAM supports you with exclusive features.",
+      "overlay": "Fashion & beauty photography"
+    },
+    "difference": {
+      "title": "How does using C-KAM make a difference?",
+      "subtitle": "Our goal in C-KAM is to help you create a premium and easy experience for you and your client.",
+      "items": {
+        "item_1": "Create freely without client stress",
+        "item_2": "Secure your rights and client payment rights",
+        "item_3": "Earn client respect with your professionalism",
+        "item_4": "Develop your relationship with clients",
+        "item_5": "Control project expenses and study profits",
+        "item_6": "Get more clients"
+      }
+    },
+    "outcomes": {
+      "title": "With C-KAM you will get ..",
+      "cta": "Subscribe now",
+      "items": {
+        "item_1": "Message automation",
+        "item_2": "Official statements",
+        "item_3": "Accounting for your project",
+        "item_4": "Client database",
+        "item_5": "Secure payment guarantee",
+        "item_6": "Signed electronic contracts",
+        "item_7": "Fast session scheduling",
+        "item_8": "Deliver photos in a professional gallery",
+        "item_9": "Organize your work under one platform"
+      }
+    }
+  },
+  "terms_page": {
+    "title": "Terms of Service - CKAM",
+    "kicker": "Legal",
+    "hero_title": "Terms of Service",
+    "hero_subtitle": "These terms explain how you may use CKAM services, billing tools, and booking features.",
+    "meta": {
+      "updated": "Last updated: April 23, 2026",
+      "scope": "Applies to all CKAM users"
+    },
+    "intro": "By accessing or using CKAM, you agree to these Terms of Service. If you do not agree, please do not use the platform.",
+    "sections": {
+      "acceptance": {
+        "title": "1. Acceptance of terms",
+        "body": "Using CKAM means you accept these terms and any policy referenced here, including our Privacy Policy."
+      },
+      "services": {
+        "title": "2. Services and eligibility",
+        "body": "CKAM provides booking, gallery, client management, payment, and workflow tools for photographers and studio teams. You must provide accurate information and be authorized to use your account."
+      },
+      "account": {
+        "title": "3. Account responsibilities",
+        "li1": "You are responsible for maintaining account security and controlling access credentials.",
+        "li2": "You are responsible for all actions performed through your account.",
+        "li3": "You must notify us promptly if you suspect unauthorized access."
+      },
+      "billing": {
+        "title": "4. Subscription, billing, and payments",
+        "body": "Paid plans are billed according to the selected cycle. Trial offers may convert to paid subscriptions unless canceled before billing starts. Third-party payment providers may apply their own processing terms."
+      },
+      "cancellation": {
+        "title": "5. Cancellation and refunds",
+        "body": "You may cancel your subscription at any time. Access continues until the end of the paid period unless otherwise stated. Fees already paid are generally non-refundable unless required by law."
+      },
+      "content": {
+        "title": "6. User content and intellectual property",
+        "body": "You retain ownership of your uploaded content. By using CKAM, you grant us a limited license to host, process, and display your content only to operate and improve the service."
+      },
+      "prohibited": {
+        "title": "7. Prohibited use",
+        "li1": "Do not use the platform for unlawful, abusive, or fraudulent activity.",
+        "li2": "Do not upload malicious code or attempt to disrupt the service.",
+        "li3": "Do not infringe third-party rights when publishing content."
+      },
+      "liability": {
+        "title": "8. Disclaimers and limitation of liability",
+        "body": "The service is provided on an \"as available\" basis. To the maximum extent permitted by law, CKAM is not liable for indirect, incidental, or consequential damages related to service use."
+      },
+      "termination": {
+        "title": "9. Termination",
+        "body": "We may suspend or terminate access for material violations of these terms, misuse of the platform, or legal requirements."
+      },
+      "law": {
+        "title": "10. Governing law and updates",
+        "body": "These terms are governed by applicable laws in our operating jurisdiction. We may update these terms from time to time; continued use indicates acceptance of updates."
+      },
+      "contact": {
+        "title": "11. Contact",
+        "body_html": "For legal questions, contact us at <a href=\"mailto:support@ckam.io\">support@ckam.io</a>."
+      }
+    },
+    "side": {
+      "title": "On this page",
+      "i1": "Acceptance",
+      "i2": "Services",
+      "i3": "Account",
+      "i4": "Billing",
+      "i5": "Content & IP",
+      "i6": "Liability",
+      "privacy_html": "See also our <a href=\"privacy-policy.html\">Privacy Policy</a>."
+    }
+  },
+  "privacy_page": {
+    "title": "Privacy Policy - CKAM",
+    "kicker": "Legal",
+    "hero_title": "Privacy Policy",
+    "hero_subtitle": "This policy explains what data we collect, why we use it, and how we protect your information.",
+    "meta": {
+      "updated": "Last updated: April 23, 2026",
+      "scope": "Data protection and transparency"
+    },
+    "intro": "We respect your privacy and process personal data in line with applicable laws and service obligations.",
+    "sections": {
+      "collect": {
+        "title": "1. Information we collect",
+        "li1": "Account information such as name, email, phone, and login credentials.",
+        "li2": "Business and booking data such as services, client records, schedules, and notes.",
+        "li3": "Usage data such as page interactions, device type, and browser details."
+      },
+      "use": {
+        "title": "2. How we use information",
+        "body": "We use data to provide and improve the service, process bookings and payments, communicate updates, maintain security, and provide support."
+      },
+      "share": {
+        "title": "3. Sharing and processors",
+        "body": "We may share information with trusted providers (such as hosting, analytics, and payment processors) only as needed to deliver the service and under confidentiality obligations."
+      },
+      "cookies": {
+        "title": "4. Cookies and tracking",
+        "body": "We use cookies and similar technologies to keep sessions active, remember preferences, and understand product usage. You can control cookie settings in your browser."
+      },
+      "retention": {
+        "title": "5. Data retention",
+        "body": "We retain data only as long as necessary for service delivery, legal compliance, dispute resolution, and legitimate business needs."
+      },
+      "security": {
+        "title": "6. Security measures",
+        "body": "We apply reasonable administrative, technical, and organizational safeguards to protect data from unauthorized access, disclosure, or misuse."
+      },
+      "rights": {
+        "title": "7. Your rights",
+        "li1": "Request access to your personal data.",
+        "li2": "Request correction or deletion where applicable.",
+        "li3": "Object to or restrict certain processing where legally available."
+      },
+      "updates": {
+        "title": "8. Policy updates",
+        "body": "We may revise this Privacy Policy from time to time. The latest version will always be posted here with the updated effective date."
+      },
+      "contact": {
+        "title": "9. Contact",
+        "body_html": "For privacy inquiries, contact us at <a href=\"mailto:support@ckam.io\">support@ckam.io</a>."
+      }
+    },
+    "side": {
+      "title": "On this page",
+      "i1": "Information collected",
+      "i2": "How we use data",
+      "i3": "Sharing",
+      "i4": "Security",
+      "i5": "Your rights",
+      "i6": "Updates",
+      "terms_html": "See also our <a href=\"terms-of-service.html\">Terms of Service</a>."
+    }
+  },
+  "blog_page": {
+    "title": "Blogs - C-KAM",
+    "hero": {
+      "kicker": "C-KAM Journal",
+      "title": "Insights that help photographers grow smarter",
+      "subtitle": "Practical guides, studio workflows, client experience tips, and business ideas for photographers building a modern brand.",
+      "primary_cta": "Explore Articles",
+      "secondary_cta": "See Platform Features",
+      "featured_badge": "Featured Story",
+      "featured_title": "How top studios turn inquiries into confirmed bookings",
+      "featured_meta": "8 min read - Booking Strategy"
+    },
+    "categories": {
+      "all": "All",
+      "booking": "Booking Flow",
+      "client_experience": "Client Experience",
+      "marketing": "Marketing",
+      "finance": "Finance",
+      "operations": "Operations"
+    },
+    "posts": {
+      "title": "Latest Articles",
+      "subtitle": "Fresh practical content written for photographers and studio teams.",
+      "read_more": "Read More",
+      "items": {
+        "p1": {
+          "meta": "Booking - 6 min read",
+          "title": "5 ways to reduce no-shows and protect your schedule",
+          "excerpt": "Simple automations and communication touches that improve attendance and save your time each week."
+        },
+        "p2": {
+          "meta": "Client Experience - 7 min read",
+          "title": "Design a premium client journey from first message to delivery",
+          "excerpt": "Use small but intentional steps to build trust and make every client interaction feel polished."
+        },
+        "p3": {
+          "meta": "Marketing - 5 min read",
+          "title": "Create content that attracts your ideal photography clients",
+          "excerpt": "A repeatable weekly system to publish better content without burning out your creative energy."
+        },
+        "p4": {
+          "meta": "Finance - 9 min read",
+          "title": "Pricing sessions confidently without losing quality clients",
+          "excerpt": "How to present value clearly, structure packages, and keep your pricing healthy as demand grows."
+        },
+        "p5": {
+          "meta": "Operations - 6 min read",
+          "title": "Build a studio dashboard that keeps every project organized",
+          "excerpt": "A practical setup for tasks, notes, deliverables, and status tracking that your whole team can follow."
+        },
+        "p6": {
+          "meta": "Delivery - 4 min read",
+          "title": "Deliver galleries faster while keeping a premium presentation",
+          "excerpt": "Balance speed and quality with a delivery workflow that clients love and recommend to others."
+        }
+      }
+    },
+    "newsletter": {
+      "title": "Get one practical growth tip every week",
+      "subtitle": "Join photographers receiving actionable ideas to improve bookings, client experience, and studio operations.",
+      "cta": "Join Free"
+    }
+  },
+  "single_blog_page": {
+    "title": "Single Blog - C-KAM",
+    "hero": {
+      "back": "Back to Blogs",
+      "category": "Booking Strategy",
+      "title": "How top studios turn inquiries into confirmed bookings",
+      "subtitle": "A practical playbook for moving clients from first interest to a paid, scheduled session without adding pressure or confusion.",
+      "author": "C-KAM Editorial",
+      "read_time": "8 min read",
+      "date": "Studio Growth Guide"
+    },
+    "article": {
+      "lead": "A great booking experience is not only about having a form. It is about giving the client confidence, clarity, and a simple next step at the exact moment they are ready to choose you.",
+      "s1": {
+        "title": "Start with a clear offer",
+        "p1": "Clients should understand what they are booking, what is included, how long the session takes, and what happens after payment. When those details are visible, fewer people leave to ask basic questions.",
+        "p2": "Use service cards with short descriptions, pricing cues, availability, and realistic delivery expectations. This turns your page from a portfolio into a decision-making experience."
+      },
+      "quote": "The best booking flow removes uncertainty before the client has to ask.",
+      "s2": {
+        "title": "Respond with structure, not just speed",
+        "p1": "Fast replies help, but structured replies convert better. Send clients a link to select a service, choose a time slot, confirm contact details, and complete payment in one path.",
+        "item_1": "Keep package names simple and client-friendly.",
+        "item_2": "Show only available slots to reduce back-and-forth messages.",
+        "item_3": "Confirm the next step immediately after booking."
+      },
+      "s3": {
+        "title": "Make payment feel professional",
+        "p1": "A secure online payment step protects your time and gives clients a familiar checkout experience. It also helps you separate serious bookings from casual inquiries.",
+        "p2": "When clients receive a confirmation, payment record, and clear session details, they trust the process and are more likely to arrive prepared."
+      }
+    },
+    "cta": {
+      "title": "Ready to make booking feel premium?",
+      "subtitle": "Use C-KAM to show services, collect bookings, manage clients, and keep your workflow organized.",
+      "button": "Start Free"
+    },
+    "sidebar": {
+      "title": "In this article",
+      "item_1": "Clear offers",
+      "item_2": "Structured responses",
+      "item_3": "Payment confidence",
+      "tip_label": "Studio Tip",
+      "tip": "If a client asks the same question twice a week, that answer belongs on your booking page."
+    },
+    "related": {
+      "title": "Related Reads",
+      "subtitle": "More ideas to improve your studio workflow."
+    }
+  }
+}

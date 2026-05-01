@@ -1,0 +1,515 @@
+﻿.booking-demo-react {
+  background: #fff;
+}
+
+.booking-demo-react .booking-hero {
+  position: relative;
+  overflow: hidden;
+  padding: 120px 0 90px;
+  background: #111;
+  margin-top: 113px;
+  margin-bottom: 50px;
+}
+
+
+
+.booking-demo-react .booking-hero:before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(90deg, rgba(36, 46, 55, 0.88), rgba(36, 46, 55, 0.35)), url('/assets/img/cta-bg-1.jpg');
+  background-size: cover;
+  background-position: center;
+}
+
+
+
+
+.booking-demo-react .booking-hero .container {
+  position: relative;
+  z-index: 1;
+}
+
+.booking-demo-react .brand-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.32);
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(3px);
+  color: #fff;
+}
+
+.booking-demo-react .brand-pill .meta {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.booking-demo-react .brand-pill .meta strong {
+  display: block;
+  white-space: nowrap;
+}
+
+.booking-demo-react .brand-pill .meta small {
+  display: block;
+  margin-top: 3px;
+  opacity: 0.92;
+}
+
+
+
+.booking-demo-react .brand-pill img {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(255, 255, 255, 0.75);
+}
+
+.booking-demo-react .hero-title {
+  letter-spacing: -0.02em;
+  margin-bottom: 18px;
+}
+
+.booking-demo-react .hero-lead {
+  opacity: 0.88;
+  font-size: 18px;
+  line-height: 1.65;
+  max-width: 60ch;
+}
+
+.booking-demo-react .hero-actions .btn {
+  border-radius: 999px;
+  padding: 12px 18px;
+}
+
+.booking-demo-react .mini-site-card,
+.booking-demo-react .summary-card,
+.booking-demo-react .booking-surface,
+.booking-demo-react .service-showcase-card,
+.booking-demo-react .review-showcase {
+  border: 1px solid rgba(20, 40, 70, 0.1);
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.06);
+}
+
+.booking-demo-react .mini-site-card {
+  border-radius: 16px;
+}
+
+.booking-demo-react .icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(244, 126, 66, 0.14);
+  color: #f47e42;
+  font-size: 22px;
+}
+
+.booking-demo-react .icon-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.booking-demo-react .icon-action {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(20, 40, 70, 0.12);
+  background: rgba(244, 126, 66, 0.1);
+  color: #f47e42;
+}
+
+.booking-demo-react .soft-divider {
+  height: 1px;
+  background: rgba(20, 40, 70, 0.08);
+}
+
+.booking-demo-react .booking-section {
+  padding: 90px 0;
+  background: #fff;
+}
+
+.booking-demo-react .after-hero-gap {
+  margin-top: 28px;
+}
+
+.booking-demo-react .photo-collage img {
+  width: 100%;
+  object-fit: cover;
+  border-radius: 18px;
+  box-shadow: 0 18px 50px rgba(36, 46, 55, 0.14);
+}
+
+.booking-demo-react .photo-collage .big {
+  height: 440px;
+}
+
+.booking-demo-react .photo-collage .small {
+  height: 210px;
+}
+
+.booking-demo-react .photo-collage .offset-top {
+  margin-top: -34px;
+}
+
+.booking-demo-react .photo-collage .offset-mid {
+  margin-top: 18px;
+}
+
+.booking-demo-react .service-showcase-card {
+  border-radius: 22px;
+  overflow: hidden;
+  height: 100%;
+}
+
+.booking-demo-react .service-showcase-card .carousel-item img,
+.booking-demo-react .service-showcase-card .react-carousel-track img {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+}
+
+.booking-demo-react .react-carousel {
+  position: relative;
+}
+
+.booking-demo-react .react-carousel-track {
+  position: relative;
+}
+
+.booking-demo-react .react-carousel-track img {
+  display: block;
+}
+
+.booking-demo-react .react-carousel-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 0;
+  background: rgba(255, 255, 255, 0.92);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #f47e42;
+}
+
+.booking-demo-react .react-carousel-btn.prev {
+  left: 10px;
+}
+
+.booking-demo-react .react-carousel-btn.next {
+  right: 10px;
+}
+
+.booking-demo-react .service-showcase-card .content {
+  padding: 18px;
+}
+
+.booking-demo-react .service-showcase-card .badge {
+  font-weight: 500;
+  border-radius: 999px;
+  background: rgba(244, 126, 66, 0.14) !important;
+  color: #b06b00 !important;
+  margin-bottom: 10px;
+}
+
+.booking-demo-react .service-price {
+  color: #f47e42;
+  font-weight: 700;
+  font-size: 28px;
+  margin-top: 8px;
+}
+
+.booking-demo-react .gallery-grid img {
+  border-radius: 16px;
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+}
+
+.booking-demo-react .booking-surface {
+  border-radius: 18px;
+  overflow: hidden;
+}
+
+.booking-demo-react .session-card {
+  border: 1px solid rgba(20, 40, 70, 0.1);
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all .18s ease;
+  background: #fff;
+  height: 100%;
+}
+
+.booking-demo-react .session-card.active {
+  border-color: #f47e42;
+  box-shadow: 0 16px 28px rgba(244, 126, 66, 0.2);
+  background: linear-gradient(0deg, rgba(244, 126, 66, 0.1), rgba(244, 126, 66, 0));
+}
+
+.booking-demo-react .summary-card.sticky-top {
+  top: 110px !important;
+  z-index: 10;
+}
+
+.booking-demo-react .time-slot {
+  border-color: rgba(244, 126, 66, 0.75) !important;
+  border-width: 1.5px !important;
+  color: #1f2937 !important;
+  background: #fff;
+  font-weight: 500;
+}
+
+.booking-demo-react .time-slot:hover,
+.booking-demo-react .time-slot.active {
+  background: #f47e42 !important;
+  color: #fff !important;
+  border-color: #f47e42 !important;
+}
+
+.booking-demo-react .reviews-kicker {
+  color: #f47e42;
+  font-size: 13px;
+  letter-spacing: 2px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.booking-demo-react .review-showcase {
+  border-radius: 34px;
+  padding: 26px 26px 30px;
+  min-height: 250px;
+  position: relative;
+  overflow: hidden;
+}
+
+.booking-demo-react .review-showcase:after {
+  content: "";
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 112px;
+  height: 112px;
+  border-radius: 0 0 0 100%;
+  background: rgba(244, 126, 66, 0.15);
+}
+
+.rtl .booking-demo-react .review-showcase:after,
+[dir="rtl"] .booking-demo-react .review-showcase:after {
+  right: auto;
+  left: 0;
+  border-radius: 0 0 100% 0;
+}
+
+.booking-demo-react .review-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 16px;
+  position: relative;
+  z-index: 1;
+}
+
+.booking-demo-react .review-user {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.booking-demo-react .review-user-badge {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(244, 126, 66, 0.16);
+  color: #f47e42;
+  font-weight: 700;
+  box-shadow: 0 12px 30px rgba(244, 126, 66, 0.24);
+}
+
+.booking-demo-react .review-stars {
+  color: #f47e42;
+}
+
+.booking-demo-react .review-verified {
+  color: #6c757d;
+  margin-inline-start: 8px;
+}
+
+.booking-demo-react .review-body {
+  position: relative;
+  z-index: 1;
+  font-size: clamp(22px, 2vw, 30px);
+  line-height: 1.3;
+  color: #2d3748;
+  margin-top: 16px;
+  text-align: center;
+  padding-inline: 74px;
+}
+
+.booking-demo-react .review-nav-btn {
+  position: absolute;
+  top: 52%;
+  transform: translateY(-50%);
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 1px solid rgba(244, 126, 66, 0.45);
+  background: #fff;
+  color: #f47e42;
+  z-index: 2;
+}
+
+.booking-demo-react .review-nav-btn.prev {
+  left: 10px;
+}
+
+.booking-demo-react .review-nav-btn.next {
+  right: 10px;
+}
+
+.booking-demo-react .review-indicators {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.booking-demo-react .review-indicators button {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 0;
+  background: #f3c9ae;
+}
+
+.booking-demo-react .review-indicators button.active {
+  background: #f47e42;
+}
+
+.theme-dark .react-contact-page,
+.theme-dark .react-legal-page {
+  background: #000;
+}
+
+.theme-dark .react-contact-page .contact-content p,
+.theme-dark .react-contact-page .contact-content a,
+.theme-dark .react-contact-page .contact-content h6 {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.theme-dark .react-contact-page .contact-content h1 {
+  color: #fff;
+}
+
+.theme-dark .react-contact-page .contact-form {
+  background: transparent;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.theme-dark .react-contact-page .form-check-label a {
+  color: #f47e42 !important;
+}
+
+.theme-dark .booking-demo-react,
+.theme-dark .booking-demo-react .booking-section {
+  background: #000 !important;
+}
+
+.theme-dark .booking-demo-react .mini-site-card,
+.theme-dark .booking-demo-react .summary-card,
+.theme-dark .booking-demo-react .booking-surface,
+.theme-dark .booking-demo-react .service-showcase-card,
+.theme-dark .booking-demo-react .review-showcase,
+.theme-dark .booking-demo-react .session-card {
+  background: #111828 !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+.theme-dark .booking-demo-react .service-showcase-card p,
+.theme-dark .booking-demo-react .review-verified,
+.theme-dark .booking-demo-react p,
+.theme-dark .booking-demo-react .text-muted,
+.theme-dark .booking-demo-react label {
+  color: rgba(255, 255, 255, 0.75) !important;
+}
+
+.theme-dark .booking-demo-react h1,
+.theme-dark .booking-demo-react h2,
+.theme-dark .booking-demo-react h3,
+.theme-dark .booking-demo-react h4,
+.theme-dark .booking-demo-react h5,
+.theme-dark .booking-demo-react h6,
+.theme-dark .booking-demo-react strong,
+.theme-dark .booking-demo-react .review-body,
+.theme-dark .booking-demo-react .review-meta strong {
+  color: #fff !important;
+}
+
+.theme-dark .booking-demo-react .form-control {
+  background: rgba(255, 255, 255, 0.06) !important;
+  border-color: rgba(255, 255, 255, 0.18) !important;
+  color: #fff !important;
+}
+
+.theme-dark .booking-demo-react .time-slot {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border-color: rgba(255, 255, 255, 0.22) !important;
+  color: #f8fafc !important;
+}
+
+@media (max-width: 991px) {
+  .booking-demo-react .booking-hero {
+    padding: 96px 0 72px;
+  }
+  .booking-demo-react .photo-collage .big {
+    height: 280px;
+  }
+  .booking-demo-react .photo-collage .small,
+  .booking-demo-react .gallery-grid img {
+    height: 180px;
+  }
+  .booking-demo-react .photo-collage .offset-top {
+    margin-top: 0;
+  }
+  .booking-demo-react .summary-card.sticky-top {
+    top: 96px !important;
+  }
+  .booking-demo-react .review-body {
+    font-size: 26px;
+    padding-inline: 62px;
+  }
+}
+@media (max-width: 767px) {
+  .booking-demo-react .brand-pill .meta strong {
+    white-space: normal;
+  }
+  .booking-demo-react .review-body {
+    font-size: 22px;
+    padding-inline: 50px;
+  }
+  .booking-demo-react .hero-lead {
+    font-size: 16px;
+  }
+}
+
+

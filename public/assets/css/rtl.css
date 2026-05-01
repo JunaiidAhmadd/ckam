@@ -1,0 +1,322 @@
+/* RTL Support Styles for Arabic Language */
+.rtl {
+    direction: rtl;
+    text-align: right;
+}
+
+/* RTL Bootstrap Overrides */
+.rtl .navbar-nav {
+    padding-right: 0;
+}
+
+.rtl .navbar-nav .nav-link {
+    text-align: right;
+}
+
+.rtl .dropdown-menu {
+    right: 0;
+    left: auto;
+    text-align: right;
+}
+
+.rtl .dropdown-menu .dropdown-item {
+    text-align: right;
+}
+
+.rtl .text-left {
+    text-align: right !important;
+}
+
+.rtl .text-right {
+    text-align: left !important;
+}
+
+.rtl .ml-auto,
+.rtl .mx-auto {
+    margin-left: 0 !important;
+    margin-right: auto !important;
+}
+
+.rtl .mr-auto {
+    margin-right: 0 !important;
+    margin-left: auto !important;
+}
+
+.rtl .pl-0,
+.rtl .px-0 {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+
+.rtl .pr-0,
+.rtl .px-0 {
+    padding-right: 0 !important;
+    padding-left: 0 !important;
+}
+
+.rtl .ml-0,
+.rtl .mx-0 {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+}
+
+.rtl .mr-0,
+.rtl .mx-0 {
+    margin-right: 0 !important;
+    margin-left: 0 !important;
+}
+
+.rtl .float-left {
+    float: right !important;
+}
+
+.rtl .float-right {
+    float: left !important;
+}
+
+/* RTL Form Controls */
+.rtl .form-control {
+    text-align: right;
+}
+
+.rtl .form-check {
+    padding-left: 0;
+    padding-right: 1.25rem;
+}
+
+.rtl .form-check-input {
+    margin-left: 0;
+    margin-right: -1.25rem;
+}
+
+.rtl .form-check-label {
+    margin-left: 0;
+    margin-right: 1.25rem;
+}
+
+/* RTL Radio Buttons */
+.rtl .variation-item {
+    flex-direction: row-reverse;
+}
+
+.rtl .variation-item input[type="radio"] {
+    margin-left: 8px;
+    margin-right: 0;
+}
+
+.rtl .variation-item label {
+    margin-left: 0;
+    margin-right: 8px;
+}
+
+/* RTL Cards */
+.rtl .card {
+    text-align: right;
+}
+
+.rtl .card-body {
+    text-align: right;
+}
+
+/* RTL Tables */
+.rtl .table {
+    text-align: right;
+}
+
+.rtl .table th,
+.rtl .table td {
+    text-align: right;
+}
+
+/* RTL Lists */
+.rtl .list-unstyled {
+    text-align: right;
+}
+
+.rtl .list-unstyled li {
+    text-align: right;
+}
+
+/* RTL Breadcrumb */
+.rtl .breadcrumb {
+    text-align: right;
+}
+
+.rtl .breadcrumb-item + .breadcrumb-item::before {
+    content: "";
+    float: right;
+    padding-left: 0.5rem;
+    padding-right: 0;
+}
+
+.rtl .breadcrumb-item + .breadcrumb-item {
+    padding-right: 0.5rem;
+    padding-left: 0;
+}
+
+/* RTL Pagination */
+.rtl .pagination {
+    justify-content: flex-start;
+}
+
+.rtl .page-link {
+    text-align: right;
+}
+
+/* RTL Modal */
+.rtl .modal-content {
+    text-align: right;
+}
+
+.rtl .modal-header .close {
+    margin-left: auto;
+    margin-right: 0;
+}
+
+/* RTL Alerts */
+.rtl .alert {
+    text-align: right;
+}
+
+/* RTL Badges */
+.rtl .badge {
+    text-align: right;
+}
+
+/* RTL Progress */
+.rtl .progress {
+    text-align: right;
+}
+
+/* RTL Tooltips */
+.rtl .tooltip {
+    text-align: right;
+}
+
+/* RTL Popovers */
+.rtl .popover {
+    text-align: right;
+}
+
+/* RTL Carousel */
+.rtl .carousel-control-prev {
+    left: auto;
+    right: 0;
+}
+
+.rtl .carousel-control-next {
+    right: auto;
+    left: 0;
+}
+
+.rtl .carousel-indicators {
+    justify-content: flex-end;
+}
+
+/* RTL Specific Theme Overrides */
+.rtl .header-wrap .navbar-brand {
+    margin-left: auto;
+    margin-right: 0;
+}
+
+.rtl .other-options {
+    margin-left: 0;
+    margin-right: auto;
+}
+
+.rtl .footer-widget {
+    text-align: right;
+}
+
+.rtl .footer-links li {
+    text-align: right;
+}
+
+.rtl .contact-info li {
+    text-align: right;
+}
+
+.rtl .section-title {
+    text-align: center;
+}
+
+.rtl .section-title h2 {
+    text-align: center;
+}
+
+.rtl .product-card {
+    text-align: right;
+}
+
+.rtl .product-info h3 {
+    text-align: right;
+}
+
+.rtl .product-price {
+    text-align: right;
+}
+
+.rtl .single-product-details {
+    text-align: right;
+}
+
+.rtl .single-product-title {
+    text-align: right;
+}
+
+.rtl .single-product-desc {
+    text-align: right;
+}
+
+.rtl .product-more-option-item h4 {
+    text-align: right;
+}
+
+.rtl .booking-info-form {
+    text-align: right;
+}
+
+.rtl .form-group {
+    text-align: right;
+}
+
+.rtl .btn {
+    text-align: center;
+}
+
+/* RTL Responsive Grid Fixes */
+@media (max-width: 767.98px) {
+    .rtl .navbar-nav {
+        text-align: right;
+    }
+    
+    .rtl .navbar-nav .nav-link {
+        text-align: right;
+    }
+    
+    .rtl .dropdown-menu {
+        right: 0;
+        left: auto;
+    }
+}
+
+/* RTL Custom Animations and Transitions */
+.rtl [data-aos] {
+    transform: translateX(0);
+}
+
+.rtl [data-aos="fade-right"] {
+    transform: translateX(-100px);
+}
+
+.rtl [data-aos="fade-left"] {
+    transform: translateX(100px);
+}
+
+.rtl.aos-animate[data-aos="fade-right"] {
+    transform: translateX(0);
+}
+
+.rtl.aos-animate[data-aos="fade-left"] {
+    transform: translateX(0);
+}
