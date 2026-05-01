@@ -254,7 +254,7 @@ export default function FeaturesPage() {
             ))}
           </ul>
 
-          <p className="journey-subtitle">{t(previewSource.subtitleKey, '')}</p>
+          <p className="journey-subtitle" data-builder-field="subtitle">{t(previewSource.subtitleKey, '')}</p>
 
           <div className="journey-content">
             <div className="journey-board">
@@ -262,8 +262,8 @@ export default function FeaturesPage() {
                 <span className="journey-submit">{t('features_page.journey.submit', 'SUBMIT')}</span>
               </div>
               <div className="journey-board-inner">
-                <h3>{t(previewSource.titleKey, '')}</h3>
-                <p>{t('features_page.journey.by_line', 'BY SANDER DESIGN')}</p>
+                <h3 data-builder-field="description">{t(previewSource.titleKey, '')}</h3>
+                <p data-builder-field="eyebrow">{t('features_page.journey.by_line', 'BY SANDER DESIGN')}</p>
                 <div className="journey-photo-grid">
                   {previewSource.images.map((imagePath, index) => (
                     <img key={`${imagePath}-${index}`} src={imagePath} alt={`Journey ${index + 1}`} />
@@ -286,7 +286,7 @@ export default function FeaturesPage() {
           </div>
 
           <div className="journey-cta-wrap">
-            <a href="https://ckam-photographer.cyphersol.com/auth/login" className="journey-cta">{t('features_page.journey.cta', 'Subscribe for free now')}</a>
+            <a href="https://ckam-photographer.cyphersol.com/auth/login" className="journey-cta" data-builder-field="primaryButtonText" data-builder-bind="text" data-builder-button="primary">{t('features_page.journey.cta', 'Subscribe for free now')}</a>
           </div>
         </div>
       </section>
@@ -338,8 +338,8 @@ export default function FeaturesPage() {
             <div className="flow-phone">
               <div className="flow-phone-screen">
                 <div className="flow-check"><i className="ri-check-line" /></div>
-                <h4>{t('features_page.flow.phone_title', 'Thank you, Peter!')}</h4>
-                <p dangerouslySetInnerHTML={{ __html: t('features_page.flow.phone_sub', "Let's create<br>something special") }} />
+                <h4 data-builder-field="subtitle">{t('features_page.flow.phone_title', 'Thank you, Peter!')}</h4>
+                <p data-builder-field="description" data-builder-bind="html" dangerouslySetInnerHTML={{ __html: t('features_page.flow.phone_sub', "Let's create<br>something special") }} />
               </div>
             </div>
 
@@ -360,12 +360,12 @@ export default function FeaturesPage() {
 
       <section className="fields-section" data-builder-section="fields-extra">
         <div className="container">
-          <h2 className="fields-title">{t('features_page.fields.title', 'For photographers in every niche')}</h2>
-          <p className="fields-subtitle">{t('features_page.fields.subtitle', 'Whatever your niche is, C-KAM supports you with exclusive features')}</p>
+          <h2 className="fields-title" data-builder-field="title">{t('features_page.fields.title', 'For photographers in every niche')}</h2>
+          <p className="fields-subtitle" data-builder-field="subtitle">{t('features_page.fields.subtitle', 'Whatever your niche is, C-KAM supports you with exclusive features')}</p>
 
           <div className="fields-grid fields-grid-top">
             <article className="field-card">
-              <img src="/assets/img/project/project-7.jpg" alt="Portrait photography" />
+              <img data-builder-field="image" data-builder-bind="src" src="/assets/img/project/project-7.jpg" alt="Portrait photography" />
             </article>
             <article className="field-card">
               <img src="/assets/img/project/project-5.jpg" alt="Food photography" />
@@ -376,7 +376,7 @@ export default function FeaturesPage() {
             <article className="field-card field-card-overlay">
               <img src="/assets/img/project/project-4.jpg" alt="Fashion photography" />
               <div className="field-overlay">
-                <span>{t('features_page.fields.overlay', 'Fashion & beauty photography')}</span>
+                <span data-builder-field="description">{t('features_page.fields.overlay', 'Fashion & beauty photography')}</span>
               </div>
             </article>
           </div>
@@ -398,8 +398,8 @@ export default function FeaturesPage() {
       <section className="difference-section" data-builder-section="difference-extra">
         <div className="difference-intro">
           <div className="container">
-            <h2 className="difference-title">{t('features_page.difference.title', 'How does using C-KAM make a difference?')}</h2>
-            <p className="difference-subtitle">{t('features_page.difference.subtitle', 'Our goal in C-KAM is to help you create a premium and easy experience for you and your client.')}</p>
+            <h2 className="difference-title" data-builder-field="title">{t('features_page.difference.title', 'How does using C-KAM make a difference?')}</h2>
+            <p className="difference-subtitle" data-builder-field="subtitle">{t('features_page.difference.subtitle', 'Our goal in C-KAM is to help you create a premium and easy experience for you and your client.')}</p>
             <div className="difference-down"><i className="ri-arrow-down-s-line" /></div>
           </div>
         </div>

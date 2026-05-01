@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useMemo, useState } from 'react';
+﻿import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Button, Card, Col, Container, Form, Row } from 'react-bootstrap';
 import WebsiteBuilderForm from './WebsiteBuilderForm.jsx';
 import { useBuilder } from '../state/BuilderContext.jsx';
@@ -8,7 +8,7 @@ import { getLocalizedValue } from '../model/schema';
 const APP_COPY = {
   en: {
     pageTitle: 'Website Builder',
-    pageSubtitle: 'Schema-driven modular editor with live preview',
+    pageSubtitle: 'Edits on the left update the preview on the right.',
     liveUpdates: 'Live updates',
     savedLabel: 'Saved',
     notSaved: 'Not saved',
@@ -19,12 +19,12 @@ const APP_COPY = {
     livePreview: 'Live preview',
     headerFooterBadge: 'Header + Footer',
     pageBadge: 'Page',
-    publicPagePreview: 'Public page preview',
+    publicPagePreview: 'Live preview',
     live: 'Live',
   },
   ar: {
     pageTitle: 'منشئ الموقع',
-    pageSubtitle: 'محرر مرن يعتمد على المخطط مع معاينة مباشرة',
+    pageSubtitle: 'التعديلات على اليسار تُحدّث المعاينة على اليمين.',
     liveUpdates: 'تحديثات مباشرة',
     savedLabel: 'تم الحفظ',
     notSaved: 'غير محفوظ',
@@ -35,7 +35,7 @@ const APP_COPY = {
     livePreview: 'معاينة مباشرة',
     headerFooterBadge: 'الهيدر + الفوتر',
     pageBadge: 'الصفحة',
-    publicPagePreview: 'معاينة الصفحة العامة',
+    publicPagePreview: 'معاينة مباشرة',
     live: 'مباشر',
   },
 };
@@ -74,25 +74,39 @@ const AdminWebsiteBuilderApp = () => {
   const accentColor = themeConfig?.custom?.accent || accentMap[theme] || accentMap.default;
   const [liveSync, setLiveSync] = useState(true);
   const compactMode = false;
-  const previewSlug = state.editorTarget.kind === 'global' ? 'header-footer' : (selectedPage?.id || 'home');
+  const previewSlug = state.editorTarget.kind === 'global'
+    ? 'header-footer'
+    : state.editorTarget.kind === 'page'
+      ? state.editorTarget.id
+      : (selectedPage?.id || 'home');
 
   const pageBadgeLabel = state.editorTarget.kind === 'global'
     ? copy.headerFooterBadge
-    : getLocalizedValue(selectedPage?.name, activeLocale, copy.pageBadge);
+    : getLocalizedValue(editorNode?.name, activeLocale, copy.pageBadge);
 
   const previewUrl = `/website-builder-preview/${previewSlug}?builderMode=1&theme=${encodeURIComponent(theme || 'default')}&compact=${compactMode ? '1' : '0'}&locale=${encodeURIComponent(activeLocale)}&text=${encodeURIComponent(themeConfig?.custom?.text || '')}&bg=${encodeURIComponent(themeConfig?.custom?.bg || '')}&accent=${encodeURIComponent(themeConfig?.custom?.accent || '')}&buttonBg=${encodeURIComponent(themeConfig?.custom?.buttonBg || '')}&buttonText=${encodeURIComponent(themeConfig?.custom?.buttonText || '')}`;
 
-  useEffect(() => {
+  const stateRef = useRef(state);
+  stateRef.current = state;
+
+  const pushStateToPreview = useCallback(() => {
     if (!liveSync) return;
     const frame = document.getElementById('wb-preview-iframe');
     const win = frame?.contentWindow;
     if (!win) return;
-
     win.postMessage({
       type: 'CKAM_BUILDER_SYNC',
-      payload: state,
+      payload: stateRef.current,
     }, window.location.origin);
-  }, [state, liveSync]);
+  }, [liveSync]);
+
+  useEffect(() => {
+    pushStateToPreview();
+  }, [state, pushStateToPreview]);
+
+  const onPreviewFrameLoad = useCallback(() => {
+    pushStateToPreview();
+  }, [pushStateToPreview]);
 
   return (
     <Container fluid className="px-0">
@@ -179,6 +193,7 @@ const AdminWebsiteBuilderApp = () => {
                         key={previewUrl}
                         title={`Website preview ${previewSlug}`}
                         src={previewUrl}
+                        onLoad={onPreviewFrameLoad}
                         style={{ width: '100%', height: '100%', border: 0, display: 'block' }}
                       />
                     </div>

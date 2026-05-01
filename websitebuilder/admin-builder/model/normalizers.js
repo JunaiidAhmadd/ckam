@@ -5,6 +5,7 @@ import {
   isLocalizedValue,
   normalizeFieldValue,
 } from './schema';
+import { hydrateEmptyFieldsFromLocales } from './localeContentSeeds';
 
 const asArray = (value) => (Array.isArray(value) ? value : []);
 
@@ -212,7 +213,7 @@ export const normalizeBuilderStateData = (loadedState) => {
     footer: normalizeGlobalNode(defaultGlobals.footer, source.globals?.footer),
   };
 
-  return {
+  return hydrateEmptyFieldsFromLocales({
     pages: [...pages, ...extraPages],
     globals,
     themeConfig: normalizeThemeConfig(source.themeConfig),
@@ -220,6 +221,6 @@ export const normalizeBuilderStateData = (loadedState) => {
     editorTarget: asObject(source.editorTarget) || null,
     selectedSectionByTarget: asObject(source.selectedSectionByTarget) || {},
     savedAt: typeof source.savedAt === 'string' ? source.savedAt : null,
-  };
+  });
 };
 

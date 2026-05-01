@@ -154,9 +154,76 @@ const applyFieldBinding = (sectionNode, key, value) => {
     });
 };
 
+/** Split textarea (newlines) or list field (array) into display lines */
+const builderValueToLines = (value) => {
+    if (value == null) return [];
+    if (Array.isArray(value)) return value.map((x) => String(x).trim()).filter(Boolean);
+    if (typeof value === 'string') return value.split(/\r?\n/).map((s) => s.trim()).filter(Boolean);
+    return [];
+};
+
+/** Push each line into <li> children (home hero `.growth-points`, optional bound ul) */
+const applyDescriptionLinesToLists = (sectionNode, lines) => {
+    if (!lines.length) return;
+    const candidates = [
+        sectionNode.querySelector('ul[data-builder-field="description"]'),
+        sectionNode.querySelector('.growth-points'),
+    ].filter(Boolean);
+
+    candidates.forEach((ul) => {
+        if (ul.tagName?.toLowerCase() !== 'ul') return;
+        const existing = Array.from(ul.querySelectorAll(':scope > li'));
+        lines.forEach((line, index) => {
+            if (existing[index]) {
+                existing[index].textContent = line;
+            } else {
+                const li = document.createElement('li');
+                li.textContent = line;
+                ul.appendChild(li);
+            }
+        });
+        const allItems = ul.querySelectorAll(':scope > li');
+        for (let i = lines.length; i < allItems.length; i += 1) {
+            allItems[i].textContent = '';
+        }
+    });
+};
+
+const applyMultilineToListItemSpans = (sectionNode, lines, itemSpanSelector) => {
+    if (!lines.length || !sectionNode) return;
+    const nodes = Array.from(sectionNode.querySelectorAll(itemSpanSelector));
+    lines.forEach((line, index) => {
+        if (nodes[index]) nodes[index].textContent = line;
+    });
+    nodes.forEach((node, index) => {
+        if (index >= lines.length) node.textContent = '';
+    });
+};
+
+const applyHighlightsToLists = (sectionNode, lines) => {
+    if (!lines.length) return;
+    const ul = sectionNode.querySelector('ul[data-builder-field="highlights"]');
+    if (!ul || ul.tagName?.toLowerCase() !== 'ul') return;
+    const existing = Array.from(ul.querySelectorAll(':scope > li'));
+    lines.forEach((line, index) => {
+        if (existing[index]) {
+            existing[index].textContent = line;
+        } else {
+            const li = document.createElement('li');
+            li.textContent = line;
+            ul.appendChild(li);
+        }
+    });
+    const allItems = ul.querySelectorAll(':scope > li');
+    for (let i = lines.length; i < allItems.length; i += 1) {
+        allItems[i].textContent = '';
+    }
+};
+
 const applySectionData = (sectionNode, sectionData, locale = 'en') => {
     if (!sectionNode || !sectionData) return;
 
+    const sectionId = sectionData.id || '';
     const elementValues = getSectionValues(sectionData, locale);
 
     // Handle visibility
@@ -177,23 +244,36 @@ const applySectionData = (sectionNode, sectionData, locale = 'en') => {
         eyebrowNode.textContent = elementValues.eyebrow;
     }
 
-    // Apply title to heading
     const headingNode = sectionNode.querySelector('h1, h2, h3, h4, h5, h6');
     if (headingNode && typeof elementValues.title === 'string' && elementValues.title.trim()) {
         headingNode.textContent = elementValues.title;
     }
 
-    // Apply subtitle and description to paragraphs
+    const boundSubtitle = sectionNode.querySelector('[data-builder-field="subtitle"]');
+    const boundDescription = sectionNode.querySelector('[data-builder-field="description"]');
     const paragraphNodes = Array.from(sectionNode.querySelectorAll('p'));
-    if (paragraphNodes[0] && typeof elementValues.subtitle === 'string' && elementValues.subtitle.trim()) {
+    if (!boundSubtitle && paragraphNodes[0] && typeof elementValues.subtitle === 'string' && elementValues.subtitle.trim()) {
         paragraphNodes[0].textContent = elementValues.subtitle;
     }
-    if (paragraphNodes[1] && typeof elementValues.description === 'string' && elementValues.description.trim()) {
-        paragraphNodes[1].textContent = elementValues.description;
-    } else if (paragraphNodes[0] && !elementValues.subtitle && typeof elementValues.description === 'string' && elementValues.description.trim()) {
-        // If no subtitle, use first paragraph for description
-        paragraphNodes[0].textContent = elementValues.description;
+    if (!boundDescription) {
+        if (paragraphNodes[1] && typeof elementValues.description === 'string' && elementValues.description.trim()) {
+            paragraphNodes[1].textContent = elementValues.description;
+        } else if (paragraphNodes[0] && !elementValues.subtitle && typeof elementValues.description === 'string' && elementValues.description.trim()) {
+            paragraphNodes[0].textContent = elementValues.description;
+        }
     }
+
+    const descriptionLines = builderValueToLines(elementValues.description);
+    applyDescriptionLinesToLists(sectionNode, descriptionLines);
+
+    if (sectionId === 'difference-extra') {
+        applyMultilineToListItemSpans(sectionNode, descriptionLines, '.difference-list li > span:first-child');
+    } else if (sectionId === 'cta' && sectionNode.querySelector('.outcomes-list')) {
+        applyMultilineToListItemSpans(sectionNode, descriptionLines, '.outcomes-list li > span:first-child');
+    }
+
+    const highlightLines = builderValueToLines(elementValues.highlights);
+    applyHighlightsToLists(sectionNode, highlightLines);
 
     // Apply button texts and URLs
     const actionNodes = Array.from(sectionNode.querySelectorAll('a, button')).filter((node) => {
@@ -218,8 +298,8 @@ const applySectionData = (sectionNode, sectionData, locale = 'en') => {
         }
     }
 
-    // Apply image
-    const imageNode = sectionNode.querySelector('img');
+    const boundImage = sectionNode.querySelector('img[data-builder-field="image"]');
+    const imageNode = boundImage || sectionNode.querySelector('img');
     if (imageNode && typeof elementValues.image === 'string' && elementValues.image.trim()) {
         imageNode.setAttribute('src', elementValues.image);
         if (elementValues.title) {
@@ -267,7 +347,8 @@ const PreviewContent = () => {
         };
     }, [query, theme]);
     const PageComponent = previewPageMap[pageSlug] || PlaceholderPage;
-    const showGlobalLayout = pageSlug === 'header-footer';
+    /** In builder mode, always mount header/footer so global edits sync on every page preview (not only /header-footer). */
+    const showGlobalLayout = pageSlug === 'header-footer' || builderMode;
 
     usePreviewStyles();
 
@@ -364,8 +445,8 @@ const PreviewContent = () => {
             const builderState = readBuilderStateFromStorage();
             const pageWrapper = document.querySelector('.page-wrapper');
 
-            // Apply header and footer data when in header-footer mode
-            if (pageSlug === 'header-footer' && builderState?.globals) {
+            // Apply header/footer globals whenever builder preview is active (all routes), not only /header-footer
+            if (builderMode && builderState?.globals) {
                 const headerNode = pageWrapper?.querySelector('header');
                 const footerNode = pageWrapper?.querySelector('footer');
                 
@@ -377,25 +458,36 @@ const PreviewContent = () => {
                         headerElements[field.key] = getLocalizedValue(field?.value, previewLocale, field?.value);
                     });
 
-                    // Apply brand name
                     const brandNode = headerNode.querySelector('.navbar-brand, .brand-name, [data-element="brandName"]');
                     if (brandNode && headerElements.brandName) {
-                        brandNode.textContent = headerElements.brandName;
+                        brandNode.querySelectorAll('img').forEach((img) => {
+                            img.setAttribute('alt', String(headerElements.brandName));
+                        });
+                        const brandText = brandNode.querySelector('[data-element="brandName"]');
+                        if (brandText) brandText.textContent = headerElements.brandName;
                     }
 
-                    // Apply brand logo
-                    const logoNode = headerNode.querySelector('.navbar-brand img, .brand-logo, [data-element="brandLogo"]');
-                    if (logoNode && headerElements.brandLogo) {
-                        logoNode.setAttribute('src', headerElements.brandLogo);
+                    const logoImgs = headerNode.querySelectorAll('.navbar-brand img, .brand-logo, [data-element="brandLogo"]');
+                    if (headerElements.brandLogo && String(headerElements.brandLogo).trim()) {
+                        logoImgs.forEach((img) => img.setAttribute('src', String(headerElements.brandLogo).trim()));
                     }
 
-                    // Apply login button
-                    const loginNode = headerNode.querySelector('.login-btn, [data-element="loginLabel"]');
+                    const loginNode = headerNode.querySelector('.login-btn, .btn-login, [data-element="loginLabel"]');
                     if (loginNode && headerElements.loginLabel) {
                         loginNode.textContent = headerElements.loginLabel;
                         if (headerElements.loginUrl) {
                             loginNode.setAttribute('href', headerElements.loginUrl);
                         }
+                    }
+
+                    const navLabels = headerElements.navItems;
+                    if (Array.isArray(navLabels) && navLabels.length) {
+                        const navLinks = Array.from(headerNode.querySelectorAll('.navbar-nav .nav-link'));
+                        navLabels.forEach((label, index) => {
+                            if (navLinks[index] && label != null && String(label).trim()) {
+                                navLinks[index].textContent = String(label);
+                            }
+                        });
                     }
                 }
 

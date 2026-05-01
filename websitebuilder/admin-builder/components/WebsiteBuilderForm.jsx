@@ -7,6 +7,7 @@ import {
   THEME_PRESET_SWATCHES,
   getLocalizedValue,
 } from '../model/schema';
+import { getPreviewBoundFieldKeys } from '../model/previewBoundFields';
 import BuilderFieldRenderer from './editor/BuilderFieldRenderer.jsx';
 import BuilderSectionCard from './editor/BuilderSectionCard.jsx';
 import './websiteBuilderForm.css';
@@ -33,6 +34,7 @@ const UI_COPY = {
     accentColor: 'Accent color',
     buttonColor: 'Button color',
     buttonText: 'Button text',
+    previewOnlyNote: 'No fields in this section are wired to the live preview. You can still show or hide the section.',
   },
   ar: {
     theme: 'السمة',
@@ -43,6 +45,7 @@ const UI_COPY = {
     accentColor: 'لون التمييز',
     buttonColor: 'لون الزر',
     buttonText: 'لون نص الزر',
+    previewOnlyNote: 'لا توجد حقول في هذا القسم مربوطة بالمعاينة المباشرة. يمكنك إظهار القسم أو إخفائه.',
   },
 };
 
@@ -197,25 +200,38 @@ const WebsiteBuilderForm = ({
               translationLocale={translationLocale}
               onTranslationLocaleChange={setTranslationLocale}
             >
-              {(section.fields || []).map((field) => {
-                const label = getLocalizedValue(field.label, activeLocale, field.key);
-                const helperText = getLocalizedValue(field.helperText, activeLocale, '');
+              {(() => {
+                const previewKeys = getPreviewBoundFieldKeys(page?.id, section.id);
+                const visibleFields = previewKeys == null
+                  ? (section.fields || [])
+                  : (section.fields || []).filter((f) => previewKeys.includes(f.key));
 
-                return (
-                  <Form.Group key={`${section.id}-${field.key}`}>
-                    <Form.Label className={`fw-medium mb-1 ${activeLocale === 'ar' ? 'text-end d-block' : 'text-start d-block'}`}>
-                      {label}
-                    </Form.Label>
-                    <BuilderFieldRenderer
-                      field={field}
-                      locale={translationLocale}
-                      uiLocale={activeLocale}
-                      onChange={(nextValue) => onFieldChange?.(section.id, field.key, nextValue)}
-                    />
-                    {helperText ? <Form.Text className="text-muted">{helperText}</Form.Text> : null}
-                  </Form.Group>
-                );
-              })}
+                if (visibleFields.length === 0 && previewKeys?.length === 0) {
+                  return (
+                    <p className="text-muted small mb-0">{copy.previewOnlyNote}</p>
+                  );
+                }
+
+                return visibleFields.map((field) => {
+                  const label = getLocalizedValue(field.label, activeLocale, field.key);
+                  const helperText = getLocalizedValue(field.helperText, activeLocale, '');
+
+                  return (
+                    <Form.Group key={`${section.id}-${field.key}`}>
+                      <Form.Label className={`fw-medium mb-1 ${activeLocale === 'ar' ? 'text-end d-block' : 'text-start d-block'}`}>
+                        {label}
+                      </Form.Label>
+                      <BuilderFieldRenderer
+                        field={field}
+                        locale={translationLocale}
+                        uiLocale={activeLocale}
+                        onChange={(nextValue) => onFieldChange?.(section.id, field.key, nextValue)}
+                      />
+                      {helperText ? <Form.Text className="text-muted">{helperText}</Form.Text> : null}
+                    </Form.Group>
+                  );
+                });
+              })()}
             </BuilderSectionCard>
           );
         })}
