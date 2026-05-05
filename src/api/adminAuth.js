@@ -7,7 +7,7 @@ import {
 } from './authSession';
 
 const requestJson = async (path, options = {}) => {
-  const token = getAdminToken();
+  const token = options.skipAuth ? '' : getAdminToken();
 
   const response = await fetch(buildApiUrl(path), {
     method: options.method || 'GET',
@@ -22,7 +22,10 @@ const requestJson = async (path, options = {}) => {
 
   const payload = await response.json().catch(() => null);
   if (!response.ok) {
-    const message = payload?.message || `API request failed: ${response.status}`;
+    const validationMessage = payload?.errors && typeof payload.errors === 'object'
+      ? Object.values(payload.errors).flat().find(Boolean)
+      : '';
+    const message = validationMessage || payload?.message || `API request failed: ${response.status}`;
     throw new Error(message);
   }
 
@@ -48,14 +51,22 @@ export const adminAuthApi = {
   login: async ({ email, password }) => {
     const payload = await requestJson(API_ENDPOINTS.auth.login, {
       method: 'POST',
+      skipAuth: true,
       body: JSON.stringify({ email, password }),
     });
+
+    const token = extractToken(payload);
+    const user = extractUser(payload);
+    if (token) setAdminToken(token);
+    if (user) setAuthUser(user);
+
     return payload;
   },
 
   verifyOtp: async ({ email, otp }) => {
     const payload = await requestJson(API_ENDPOINTS.auth.verifyOtp, {
       method: 'POST',
+      skipAuth: true,
       body: JSON.stringify({ email, otp }),
     });
 
@@ -73,6 +84,44 @@ export const adminAuthApi = {
     if (user) setAuthUser(user);
     return payload;
   },
+
+  updateProfile: async (updates) => requestJson(API_ENDPOINTS.auth.profile, {
+    method: 'PUT',
+    body: JSON.stringify(updates),
+  }),
+
+  updatePublicProfile: async (updates) => requestJson(API_ENDPOINTS.auth.publicProfile, {
+    method: 'PUT',
+    body: JSON.stringify(updates),
+  }),
+
+  updateAccountSettings: async (updates) => requestJson(API_ENDPOINTS.auth.accountSettings, {
+    method: 'PUT',
+    body: JSON.stringify(updates),
+  }),
+
+  updateSocialLinks: async (updates) => requestJson(API_ENDPOINTS.auth.socialLinks, {
+    method: 'PUT',
+    body: JSON.stringify(updates),
+  }),
+
+  updateLoginSecurity: async (updates) => requestJson(API_ENDPOINTS.auth.loginSecurity, {
+    method: 'PUT',
+    body: JSON.stringify(updates),
+  }),
+
+  updateTwoFactor: async ({ enabled, channel = 'email' }) => requestJson(API_ENDPOINTS.auth.twoFactor, {
+    method: 'PUT',
+    body: JSON.stringify({
+      enabled: Boolean(enabled),
+      channel,
+    }),
+  }),
+
+  verifyTwoFactor: async ({ otp }) => requestJson(API_ENDPOINTS.auth.verifyTwoFactor, {
+    method: 'POST',
+    body: JSON.stringify({ otp }),
+  }),
 
   logout: async () => {
     try {

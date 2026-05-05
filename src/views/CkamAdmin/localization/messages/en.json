@@ -329,6 +329,7 @@
     "role": "Role",
     "location": "Location",
     "bio": "Bio",
+    "website": "Website",
     "email": "Email",
     "phone": "Phone",
     "oldPassword": "Old Password",
@@ -358,10 +359,17 @@
     "twoFactorOtpValidation": "Enter a valid 4-6 digit OTP code.",
     "twoFactorOtpCancel": "Cancel",
     "twoFactorOtpVerify": "Verify",
+    "twoFactorMethodEmailOnly": "Admin 2-step verification currently supports email only.",
+    "twoFactorEmailSyncRequired": "Update the account email first, then save 2-step verification.",
+    "passwordNoChanges": "Enter password fields to update login security.",
+    "passwordUpdated": "Password updated successfully.",
+    "passwordUpdateButton": "Update Password",
+    "profileSaved": "Settings updated successfully.",
     "saveChanges": "Save Changes",
     "tabs": {
       "profile": "Profile",
       "accountSettings": "Account Settings",
+      "socialLinks": "Social Links",
       "security": "Login & Security"
     }
   },

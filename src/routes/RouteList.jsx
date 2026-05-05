@@ -1,4 +1,5 @@
 import AdminDashboard from '../views/CkamAdmin/Dashboard';
+import AdminLogin from '../views/CkamAdmin/AdminLogin';
 import AdminProfile from '../views/CkamAdmin/AdminProfile';
 import AdminEditProfile from '../views/CkamAdmin/AdminEditProfile';
 import PhotographerManagement from '../views/CkamAdmin/Photographers';
@@ -23,6 +24,8 @@ export const routes = [
     { path: 'admin/website-builder/:pageSlug', exact: true, component: PublicWebsiteBuilder },
 ];
 
-export const authRoutes = [];
+export const authRoutes = [
+    { path: 'admin/login', exact: true, component: AdminLogin },
+];
 
 

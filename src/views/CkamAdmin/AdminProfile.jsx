@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Button, Card, Col, Container, ListGroup, Nav, Row } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import HkBadge from '../../components/@hk-badge/@hk-badge';
@@ -9,7 +9,7 @@ import { useAdminPageSetup } from './shared';
 const AdminProfile = () => {
     useAdminPageSetup();
 
-    const { locale, adminProfile } = useCkamAdmin();
+    const { locale, adminProfile, fetchAdminProfile } = useCkamAdmin();
     const fullName = [adminProfile.firstName, adminProfile.lastName].filter(Boolean).join(' ');
     const initials = [adminProfile.firstName?.[0], adminProfile.lastName?.[0]].filter(Boolean).join('').toUpperCase();
     const role = locale === 'ar' ? adminProfile.roleAr : adminProfile.role;
@@ -56,6 +56,12 @@ const AdminProfile = () => {
             role: 'Role',
             location: 'Location',
         };
+
+    useEffect(() => {
+        fetchAdminProfile().catch(() => {
+            // keep existing UI data if profile fetch fails
+        });
+    }, [fetchAdminProfile]);
 
     return (
         <div className="hk-pg-body ckam-admin-page ckam-admin-profile-page">

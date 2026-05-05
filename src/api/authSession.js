@@ -15,6 +15,8 @@ export const getAdminToken = () => {
     return window.localStorage.getItem(ADMIN_TOKEN_KEY) || '';
 };
 
+export const hasAdminToken = () => Boolean(getAdminToken());
+
 export const setAdminToken = (token) => {
     if (typeof window === 'undefined') return;
     if (!token) {

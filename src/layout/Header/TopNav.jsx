@@ -4,21 +4,24 @@ import { AlignLeft, Bell, CheckSquare, CreditCard, HelpCircle, LogOut, Search, S
 import { Button, Container, Dropdown, Form, InputGroup, Nav, Navbar } from 'react-bootstrap';
 import { toggleCollapsedNav } from '../../redux/action/Theme';
 import { connect } from 'react-redux';
-import { Link } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 import classNames from 'classnames';
 import { motion } from 'framer-motion';
 import HkBadge from '../../components/@hk-badge/@hk-badge';
 import avatar3 from '../../assets/img/avatar3.jpg';
 import avatar4 from '../../assets/img/avatar4.jpg';
 import avatar12 from '../../assets/img/avatar12.jpg';
+import { adminAuthApi } from '../../api/adminAuth';
 import { ThemeSwitcher } from '../../utils/theme-provider/theme-switcher';
 import HeaderLanguageSwitcher from '../../views/CkamAdmin/localization/HeaderLanguageSwitcher';
 import { useCkamAdmin } from '../../views/CkamAdmin/context';
 
 const TopNav = ({ navCollapsed, toggleCollapsedNav }) => {
+    const history = useHistory();
     const { locale, isArabic, adminProfile } = useCkamAdmin();
     const [showDropdown, setShowDropdown] = useState(false);
     const [searchValue, setSearchValue] = useState('');
+    const [loggingOut, setLoggingOut] = useState(false);
 
     const searchPlaceholder = locale === 'ar' ? 'Search...' : 'Search...';
     const profileCopy = {
@@ -61,6 +64,21 @@ const TopNav = ({ navCollapsed, toggleCollapsedNav }) => {
     const closeSearchInput = () => {
         setSearchValue('');
         setShowDropdown(false);
+    };
+
+    const handleLogout = async () => {
+        if (loggingOut) {
+            return;
+        }
+
+        setLoggingOut(true);
+
+        try {
+            await adminAuthApi.logout();
+        } finally {
+            history.replace('/admin/login');
+            setLoggingOut(false);
+        }
     };
 
     const pageVariants = {
@@ -132,9 +150,9 @@ const TopNav = ({ navCollapsed, toggleCollapsedNav }) => {
                     </div>
                     <Dropdown.Divider as="div" />
                     <div className="p-2">
-                        <Dropdown.Item as={Link} to="/admin" className="rounded-3">
+                        <Dropdown.Item as="button" type="button" className="rounded-3" onClick={handleLogout} disabled={loggingOut}>
                             <span className="dropdown-icon feather-icon"><LogOut /></span>
-                            <span>{profileCopy.signOut}</span>
+                            <span>{loggingOut ? 'Signing out...' : profileCopy.signOut}</span>
                         </Dropdown.Item>
                     </div>
                 </Dropdown.Menu>

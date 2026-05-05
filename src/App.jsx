@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter, Redirect, Route, Switch } from 'react-router-dom';
+import { ToastContainer } from 'react-toastify';
 import AppRoutes from './routes/AppRoutes'
 import WebsiteBuilderPreviewRouter from './views/CkamAdmin/WebsiteBuilderPreviewRouter';
 import "bootstrap/js/src/collapse";
@@ -8,6 +9,7 @@ import ScrollToTop from './utils/ScrollToTop';
 function App() {
   return (
     <>
+      <ToastContainer position="top-right" autoClose={3000} theme="light" />
       <BrowserRouter>
         <BrowserRouter >
           <ScrollToTop>

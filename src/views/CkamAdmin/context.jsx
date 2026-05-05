@@ -1,6 +1,7 @@
-import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import '../../styles/scss/admin-rtl.scss';
 import { nanoid } from 'nanoid';
+import { adminAuthApi } from '../../api/adminAuth';
 import { ckamApi } from '../../api/ckamAdmin';
 import {
     initialAdminProfile,
@@ -19,6 +20,7 @@ const CkamAdminContext = createContext(null);
 const CKAM_ADMIN_LOCALE_KEY = 'ckam-admin-locale';
 const CKAM_SUPPORTED_LOCALES = ['en', 'ar'];
 const CKAM_CONTACT_MESSAGES_KEY = 'ckam-contact-messages';
+const SOCIAL_LINK_FIELDS = ['instagram', 'tiktok', 'youtube', 'facebook', 'twitter', 'snapchat', 'linkedin', 'whatsapp', 'pinterest'];
 
 const normalizeLocalizedText = (value) => ({
     en: value?.en || '',
@@ -65,9 +67,82 @@ const getInitialContactMessages = () => {
     }
 };
 
+const mapAdminProfileFromApi = (payload, fallback = initialAdminProfile) => {
+    const tabs = payload?.tabs || {};
+    const profile = tabs.profile || {};
+    const accountSettings = tabs.account_settings || {};
+    const socialLinks = tabs.social_links || {};
+    const loginSecurity = tabs.login_security || {};
+    const twoStepVerification = loginSecurity.two_step_verification || {};
+
+    return {
+        ...fallback,
+        firstName: profile.first_name ?? fallback.firstName ?? '',
+        lastName: profile.last_name ?? fallback.lastName ?? '',
+        role: profile.role ?? fallback.role ?? '',
+        roleAr: profile.role ?? fallback.roleAr ?? fallback.role ?? '',
+        email: accountSettings.email ?? fallback.email ?? '',
+        phone: accountSettings.phone ?? fallback.phone ?? '',
+        location: profile.location ?? fallback.location ?? '',
+        locationAr: profile.location ?? fallback.locationAr ?? fallback.location ?? '',
+        website: profile.personal_website ?? fallback.website ?? '',
+        personalWebsite: profile.personal_website ?? fallback.personalWebsite ?? fallback.website ?? '',
+        bio: {
+            en: profile.bio ?? fallback.bio?.en ?? '',
+            ar: fallback.bio?.ar || profile.bio || '',
+        },
+        avatar: profile.image_url ?? fallback.avatar ?? '',
+        imageUrl: profile.image_url ?? fallback.imageUrl ?? '',
+        socialLinks: SOCIAL_LINK_FIELDS.reduce((accumulator, field) => ({
+            ...accumulator,
+            [field]: socialLinks[field] ?? fallback.socialLinks?.[field] ?? '',
+        }), {}),
+        twoFactorEnabled: Boolean(twoStepVerification.two_factor_enabled),
+        twoFactorMethod: twoStepVerification.two_factor_channel === 'sms' ? 'sms' : 'email',
+        twoFactorEmail: twoStepVerification.email ?? accountSettings.email ?? fallback.twoFactorEmail ?? '',
+        twoFactorPhone: fallback.twoFactorPhone ?? accountSettings.phone ?? '',
+        loginSecurity,
+        profileTabs: tabs,
+    };
+};
+
+const buildAdminProfileUpdatePayload = (current, updates) => {
+    const next = {
+        ...current,
+        ...updates,
+        bio: updates.bio
+            ? {
+                en: updates.bio.en ?? current.bio?.en ?? '',
+                ar: updates.bio.ar ?? current.bio?.ar ?? '',
+            }
+            : current.bio,
+    };
+
+    const payload = {
+        first_name: next.firstName || '',
+        last_name: next.lastName || '',
+        role: next.role || '',
+        location: next.location || '',
+        bio: next.bio?.en || '',
+        personal_website: next.personalWebsite || next.website || '',
+        image: next.avatar || next.imageUrl || '',
+        email: next.email || '',
+        phone: next.phone || '',
+    };
+
+    if (updates.oldPassword || updates.newPassword || updates.confirmPassword) {
+        payload.old_password = updates.oldPassword || '';
+        payload.new_password = updates.newPassword || '';
+        payload.confirm_password = updates.confirmPassword || '';
+    }
+
+    return payload;
+};
+
 export const CkamAdminProvider = ({ children }) => {
     const [locale, setLocale] = useState(getInitialLocale);
     const [adminProfile, setAdminProfile] = useState(initialAdminProfile);
+    const [adminProfileLoading, setAdminProfileLoading] = useState(false);
     const [photographers, setPhotographers] = useState(initialPhotographers);
     const [plans, setPlans] = useState(initialPlans);
     const [promoCodes, setPromoCodes] = useState(initialPromoCodes);
@@ -90,23 +165,21 @@ export const CkamAdminProvider = ({ children }) => {
         window.localStorage.setItem(CKAM_CONTACT_MESSAGES_KEY, JSON.stringify(contactMessages));
     }, [contactMessages]);
 
+    const fetchAdminProfile = useCallback(async () => {
+        setAdminProfileLoading(true);
+        try {
+            const payload = await adminAuthApi.profile();
+            setAdminProfile((current) => mapAdminProfileFromApi(payload, current));
+            return payload;
+        } finally {
+            setAdminProfileLoading(false);
+        }
+    }, []);
 
     const saveAdminProfile = async (updates) => {
-        try {
-            await ckamApi.saveAdminProfile(updates);
-        } catch {
-            // keep UI responsive with local fallback
-        }
-        setAdminProfile((current) => ({
-            ...current,
-            ...updates,
-            bio: updates.bio
-                ? {
-                    en: updates.bio.en || current.bio?.en || '',
-                    ar: updates.bio.ar || current.bio?.ar || '',
-                }
-                : current.bio,
-        }));
+        const payload = buildAdminProfileUpdatePayload(adminProfile, updates);
+        await adminAuthApi.updateProfile(payload);
+        await fetchAdminProfile();
     };
     const updatePhotographerAccount = async (id, accountStatus) => {
         try {
@@ -385,6 +458,7 @@ export const CkamAdminProvider = ({ children }) => {
         isArabic: locale === 'ar',
         setLocale,
         adminProfile,
+        adminProfileLoading,
         photographers,
         plans,
         promoCodes,
@@ -394,6 +468,7 @@ export const CkamAdminProvider = ({ children }) => {
         contactMessages,
         blogPosts,
         revenueTimeline,
+        fetchAdminProfile,
         saveAdminProfile,
         updatePhotographerAccount,
         updatePhotographerTap,
@@ -408,7 +483,7 @@ export const CkamAdminProvider = ({ children }) => {
         updateContactMessageStatus,
         saveBlogPost,
         deleteBlogPost,
-    }), [locale, adminProfile, photographers, plans, promoCodes, contentSections, brandSettings, waitlist, contactMessages, blogPosts]);
+    }), [locale, adminProfile, adminProfileLoading, photographers, plans, promoCodes, contentSections, brandSettings, waitlist, contactMessages, blogPosts]);
 
     return (
         <CkamAdminContext.Provider value={value}>

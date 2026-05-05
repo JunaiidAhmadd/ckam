@@ -1,11 +1,13 @@
+import { getAdminToken } from './authSession';
 import { API_ENDPOINTS, buildApiUrl } from './endpoints';
 
 const requestJson = async (path, options = {}) => {
+  const token = getAdminToken();
   const response = await fetch(buildApiUrl(path), {
-    credentials: 'include',
     headers: {
       Accept: 'application/json',
       'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...(options.headers || {}),
     },
     ...options,

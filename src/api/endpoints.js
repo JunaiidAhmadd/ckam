@@ -5,7 +5,13 @@ export const API_ENDPOINTS = {
     login: '/api/admin/login',
     verifyOtp: '/api/admin/login/verify-otp',
     profile: '/api/admin/profile',
+    publicProfile: '/api/admin/profile/public-profile',
+    accountSettings: '/api/admin/profile/account-settings',
+    socialLinks: '/api/admin/profile/social-links',
+    loginSecurity: '/api/admin/profile/login-security',
     logout: '/api/admin/logout',
+    twoFactor: '/api/admin/two-factor',
+    verifyTwoFactor: '/api/admin/two-factor/verify',
   },
   websiteBuilder: {
     publicPage: '/api/v1/website-builder/pages/public',

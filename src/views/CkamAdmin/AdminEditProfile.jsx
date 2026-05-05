@@ -1,10 +1,24 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Col, Container, Form, Modal, Nav, Row, Tab } from 'react-bootstrap';
-import { Link, useHistory } from 'react-router-dom';
+import { Link } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import { adminAuthApi } from '../../api/adminAuth';
 import { useCkamAdmin } from './context';
 import { adminCopy, getLocalizedValue } from './localization/i18n';
 import { normalizeTranslationLocale, TranslationViewSelect, useAdminPageSetup } from './shared';
 import './AdminEditProfile.css';
+
+const SOCIAL_LINK_FIELDS = [
+    { key: 'instagram', label: { en: 'Instagram', ar: 'إنستغرام' } },
+    { key: 'tiktok', label: { en: 'TikTok', ar: 'تيك توك' } },
+    { key: 'youtube', label: { en: 'YouTube', ar: 'يوتيوب' } },
+    { key: 'facebook', label: { en: 'Facebook', ar: 'فيسبوك' } },
+    { key: 'twitter', label: { en: 'Twitter / X', ar: 'إكس / تويتر' } },
+    { key: 'snapchat', label: { en: 'Snapchat', ar: 'سناب شات' } },
+    { key: 'linkedin', label: { en: 'LinkedIn', ar: 'لينكد إن' } },
+    { key: 'whatsapp', label: { en: 'WhatsApp', ar: 'واتساب' } },
+    { key: 'pinterest', label: { en: 'Pinterest', ar: 'بنترست' } },
+];
 
 const readFileAsDataUrl = (file) => new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -15,8 +29,11 @@ const readFileAsDataUrl = (file) => new Promise((resolve, reject) => {
 
 const buildAdminFormState = (profile) => ({
     ...(profile || {}),
+    socialLinks: {
+        ...(profile?.socialLinks || {}),
+    },
     twoFactorEnabled: profile?.twoFactorEnabled ?? false,
-    twoFactorMethod: profile?.twoFactorMethod === 'sms' ? 'sms' : 'email',
+    twoFactorMethod: 'email',
     twoFactorEmail: profile?.twoFactorEmail || profile?.email || '',
     twoFactorPhone: profile?.twoFactorPhone || profile?.phone || '',
 });
@@ -24,12 +41,13 @@ const buildAdminFormState = (profile) => ({
 const AdminEditProfile = () => {
     useAdminPageSetup();
 
-    const history = useHistory();
-    const { adminProfile, saveAdminProfile, locale } = useCkamAdmin();
+    const { adminProfile, fetchAdminProfile, locale } = useCkamAdmin();
+    const [activeTab, setActiveTab] = useState('tabBlock1');
     const [formState, setFormState] = useState(buildAdminFormState(adminProfile));
     const copy = adminCopy[locale]?.adminEditProfile || adminCopy.en.adminEditProfile;
     const isArabic = locale === 'ar';
-    const securityTabLabel = copy.tabs?.security || (isArabic ? 'تسجيل الدخول والأمان' : 'Login & Security');
+    const socialTabLabel = isArabic ? 'الروابط الاجتماعية' : (copy.tabs?.socialLinks || 'Social Links');
+    const securityTabLabel = isArabic ? 'تسجيل الدخول والأمان' : (copy.tabs?.security || 'Login & Security');
 
     const [passwordForm, setPasswordForm] = useState({
         oldPassword: '',
@@ -38,38 +56,33 @@ const AdminEditProfile = () => {
     });
     const [translationLocale, setTranslationLocale] = useState(normalizeTranslationLocale(locale));
     const localizedLabelAlignClass = translationLocale === 'ar' ? 'text-end d-block' : 'text-start d-block';
-    const localizedRoleLabel = translationLocale === 'ar' ? 'الدور' : 'Role';
-    const localizedLocationLabel = translationLocale === 'ar' ? 'الموقع' : 'Location';
-    const localizedBioLabel = translationLocale === 'ar' ? 'نبذة' : 'Bio';
-    const [twoFactorDraft, setTwoFactorDraft] = useState({
-        method: formState.twoFactorMethod === 'sms' ? 'sms' : 'email',
-        email: formState.twoFactorEmail || formState.email || '',
-        phone: formState.twoFactorPhone || formState.phone || '',
-    });
-    const [twoFactorError, setTwoFactorError] = useState('');
+    const localizedLocationLabel = translationLocale === 'ar'
+        ? (copy.locationAr || 'الموقع')
+        : (copy.location || 'Location');
+    const localizedBioLabel = translationLocale === 'ar'
+        ? (copy.bioAr || 'نبذة')
+        : (copy.bio || 'Bio');
     const [twoFactorNotice, setTwoFactorNotice] = useState('');
     const [otpCode, setOtpCode] = useState('');
     const [otpError, setOtpError] = useState('');
     const [otpModal, setOtpModal] = useState({
         show: false,
-        mode: 'toggle',
         nextEnabled: false,
-        settings: null,
     });
+
+    useEffect(() => {
+        fetchAdminProfile().catch(() => {
+            // keep existing UI data if profile fetch fails
+        });
+    }, [fetchAdminProfile]);
 
     useEffect(() => {
         const nextState = buildAdminFormState(adminProfile);
         setFormState(nextState);
-        setTwoFactorDraft({
-            method: nextState.twoFactorMethod === 'sms' ? 'sms' : 'email',
-            email: nextState.twoFactorEmail || nextState.email || '',
-            phone: nextState.twoFactorPhone || nextState.phone || '',
-        });
-        setTwoFactorError('');
         setTwoFactorNotice('');
         setOtpCode('');
         setOtpError('');
-        setOtpModal({ show: false, mode: 'toggle', nextEnabled: false, settings: null });
+        setOtpModal({ show: false, nextEnabled: false });
     }, [adminProfile]);
 
     useEffect(() => {
@@ -77,103 +90,67 @@ const AdminEditProfile = () => {
     }, [locale]);
 
     const setField = (field, value) => {
-        setFormState((current) => {
-            const next = { ...current, [field]: value };
-
-            if (field === 'email' && (!current.twoFactorEmail || current.twoFactorEmail === current.email)) {
-                next.twoFactorEmail = value;
-            }
-
-            if (field === 'phone' && (!current.twoFactorPhone || current.twoFactorPhone === current.phone)) {
-                next.twoFactorPhone = value;
-            }
-
-            return next;
-        });
+        setFormState((current) => ({
+            ...current,
+            [field]: value,
+        }));
     };
 
     const setPasswordField = (field, value) => {
         setPasswordForm((current) => ({ ...current, [field]: value }));
     };
 
-    const setTwoFactorDraftField = (field, value) => {
-        setTwoFactorDraft((current) => ({ ...current, [field]: value }));
-        setTwoFactorError('');
-        setTwoFactorNotice('');
-    };
-
-    const openOtpModalForToggle = (nextEnabled) => {
+    const openOtpModalForToggle = async (nextEnabled) => {
         setOtpError('');
         setOtpCode('');
-        setOtpModal({
-            show: true,
-            mode: 'toggle',
-            nextEnabled: Boolean(nextEnabled),
-            settings: null,
-        });
-    };
 
-    const openOtpModalForSettings = () => {
-        const method = twoFactorDraft.method === 'sms' ? 'sms' : 'email';
-        const targetValue = method === 'sms'
-            ? String(twoFactorDraft.phone || '').trim()
-            : String(twoFactorDraft.email || '').trim();
+        try {
+            const payload = await adminAuthApi.updateTwoFactor({
+                enabled: Boolean(nextEnabled),
+                channel: 'email',
+            });
 
-        if (!targetValue) {
-            setTwoFactorError(
-                method === 'sms'
-                    ? (copy.twoFactorPhoneRequired || 'Phone number is required for SMS verification.')
-                    : (copy.twoFactorEmailRequired || 'Email is required for email verification.')
-            );
-            return;
+            setTwoFactorNotice(payload?.message || copy.twoFactorOtpPromptToggle || 'OTP sent successfully.');
+            toast.success(payload?.message || 'OTP sent successfully.');
+            setOtpModal({
+                show: true,
+                nextEnabled: Boolean(nextEnabled),
+            });
+        } catch (error) {
+            toast.error(error.message || 'Unable to update 2-step verification.');
         }
-
-        setTwoFactorError('');
-        setTwoFactorNotice('');
-        setOtpError('');
-        setOtpCode('');
-        setOtpModal({
-            show: true,
-            mode: 'settings',
-            nextEnabled: formState.twoFactorEnabled,
-            settings: {
-                method,
-                email: String(twoFactorDraft.email || '').trim(),
-                phone: String(twoFactorDraft.phone || '').trim(),
-            },
-        });
     };
 
     const closeOtpModal = () => {
-        setOtpModal({ show: false, mode: 'toggle', nextEnabled: false, settings: null });
+        setOtpModal({ show: false, nextEnabled: false });
         setOtpCode('');
         setOtpError('');
     };
 
-    const verifyTwoFactorOtp = () => {
+    const verifyTwoFactorOtp = async () => {
         const otp = String(otpCode || '').trim();
         if (!/^\d{4,6}$/.test(otp)) {
-            setOtpError(copy.twoFactorOtpValidation || 'Enter a valid 4-6 digit OTP code.');
+            const message = copy.twoFactorOtpValidation || 'Enter a valid 4-6 digit OTP code.';
+            setOtpError(message);
+            toast.error(message);
             return;
         }
 
-        if (otpModal.mode === 'toggle') {
-            setField('twoFactorEnabled', otpModal.nextEnabled);
+        try {
+            const payload = await adminAuthApi.verifyTwoFactor({ otp });
+            await fetchAdminProfile();
             setTwoFactorNotice(
-                otpModal.nextEnabled
+                payload?.message
+                || (otpModal.nextEnabled
                     ? (copy.twoFactorEnabledNotice || 'Two-step verification is now active.')
-                    : (copy.twoFactorDisabledNotice || 'Two-step verification is now inactive.')
+                    : (copy.twoFactorDisabledNotice || 'Two-step verification is now inactive.'))
             );
+            toast.success(payload?.message || 'Two-step verification updated successfully.');
+            closeOtpModal();
+        } catch (error) {
+            setOtpError(error.message || 'Invalid or expired OTP.');
+            toast.error(error.message || 'Invalid or expired OTP.');
         }
-
-        if (otpModal.mode === 'settings' && otpModal.settings) {
-            setField('twoFactorMethod', otpModal.settings.method);
-            setField('twoFactorEmail', otpModal.settings.email);
-            setField('twoFactorPhone', otpModal.settings.phone);
-            setTwoFactorNotice(copy.twoFactorSettingsSaved || 'Two-step verification settings updated successfully.');
-        }
-
-        closeOtpModal();
     };
 
     const handleAvatarUpload = async (event) => {
@@ -183,15 +160,71 @@ const AdminEditProfile = () => {
         setField('avatar', dataUrl);
     };
 
-    const handleSubmit = (event) => {
+    const handlePasswordUpdate = async () => {
+        try {
+            if (!passwordForm.oldPassword && !passwordForm.newPassword && !passwordForm.confirmPassword) {
+                toast.info(copy.passwordNoChanges || 'Enter password fields to update login security.');
+                return;
+            }
+
+            const response = await adminAuthApi.updateLoginSecurity({
+                old_password: passwordForm.oldPassword || '',
+                new_password: passwordForm.newPassword || '',
+                confirm_password: passwordForm.confirmPassword || '',
+            });
+
+            setPasswordForm({
+                oldPassword: '',
+                newPassword: '',
+                confirmPassword: '',
+            });
+            await fetchAdminProfile();
+            toast.success(response?.message || copy.passwordUpdated || 'Password updated successfully.');
+        } catch (error) {
+            toast.error(error.message || 'Unable to update password.');
+        }
+    };
+
+    const handleSubmit = async (event) => {
         event.preventDefault();
-        saveAdminProfile(formState);
-        history.push('/admin/profile');
+
+        try {
+            let response = null;
+
+            if (activeTab === 'tabBlock1') {
+                response = await adminAuthApi.updatePublicProfile({
+                    first_name: formState.firstName || '',
+                    last_name: formState.lastName || '',
+                    location: formState.location || '',
+                    bio: formState.bio?.en || '',
+                    personal_website: formState.personalWebsite || formState.website || '',
+                    image: formState.avatar || formState.imageUrl || '',
+                });
+            } else if (activeTab === 'tabBlock2') {
+                response = await adminAuthApi.updateAccountSettings({
+                    email: formState.email || '',
+                    phone: formState.phone || '',
+                });
+            } else if (activeTab === 'tabBlock3') {
+                response = await adminAuthApi.updateSocialLinks(
+                    SOCIAL_LINK_FIELDS.reduce((accumulator, item) => ({
+                        ...accumulator,
+                        [item.key]: formState.socialLinks?.[item.key] || '',
+                    }), {})
+                );
+            } else {
+                return;
+            }
+
+            await fetchAdminProfile();
+            toast.success(response?.message || copy.profileSaved || 'Settings updated successfully.');
+        } catch (error) {
+            toast.error(error.message || 'Unable to update settings.');
+        }
     };
 
     return (
         <Container className="ckam-admin-page ckam-admin-edit-profile-page">
-
             <div className="hk-pg-header pt-7 pb-4">
                 <div className="d-flex justify-content-between align-items-center flex-wrap gap-2">
                     <div>
@@ -205,20 +238,21 @@ const AdminEditProfile = () => {
             </div>
 
             <div className="hk-pg-body">
-                <Tab.Container defaultActiveKey="tabBlock1">
+                <Tab.Container activeKey={activeTab} onSelect={(key) => setActiveTab(key || 'tabBlock1')}>
                     <div className="card mb-4 p-2">
                         <div className="tabs-scroll">
                             <Nav variant="pills" className="flex-nowrap">
                                 <Nav.Item>
                                     <Nav.Link eventKey="tabBlock1">{copy.tabs.profile}</Nav.Link>
                                 </Nav.Item>
-
                                 <Nav.Item>
                                     <Nav.Link eventKey="tabBlock2">{copy.tabs.accountSettings}</Nav.Link>
                                 </Nav.Item>
-
                                 <Nav.Item>
-                                    <Nav.Link eventKey="tabBlock3">{securityTabLabel}</Nav.Link>
+                                    <Nav.Link eventKey="tabBlock3">{socialTabLabel}</Nav.Link>
+                                </Nav.Item>
+                                <Nav.Item>
+                                    <Nav.Link eventKey="tabBlock4">{securityTabLabel}</Nav.Link>
                                 </Nav.Item>
                             </Nav>
                         </div>
@@ -239,10 +273,7 @@ const AdminEditProfile = () => {
                                                                     <img src={formState.avatar} alt="admin" className="avatar-img" />
                                                                 ) : (
                                                                     <span className="initial-wrap fs-2 fw-semibold">
-                                                                        {[formState.firstName?.[0], formState.lastName?.[0]]
-                                                                            .filter(Boolean)
-                                                                            .join('')
-                                                                            .toUpperCase()}
+                                                                        {[formState.firstName?.[0], formState.lastName?.[0]].filter(Boolean).join('').toUpperCase()}
                                                                     </span>
                                                                 )}
                                                             </div>
@@ -269,7 +300,6 @@ const AdminEditProfile = () => {
                                                     <Form.Control value={formState.firstName} onChange={(e) => setField('firstName', e.target.value)} />
                                                 </Form.Group>
                                             </Col>
-
                                             <Col sm={6}>
                                                 <Form.Group className="mb-3">
                                                     <Form.Label>{copy.lastName}</Form.Label>
@@ -290,18 +320,7 @@ const AdminEditProfile = () => {
                                         </Row>
 
                                         <Row className="gx-3">
-                                            <Col sm={6}>
-                                                <Form.Group className="mb-3">
-                                                    <Form.Label className={localizedLabelAlignClass}>{localizedRoleLabel}</Form.Label>
-                                                    <Form.Control
-                                                        dir={translationLocale === 'ar' ? 'rtl' : 'ltr'}
-                                                        value={translationLocale === 'ar' ? (formState.roleAr || '') : (formState.role || '')}
-                                                        onChange={(e) => setField(translationLocale === 'ar' ? 'roleAr' : 'role', e.target.value)}
-                                                    />
-                                                </Form.Group>
-                                            </Col>
-
-                                            <Col sm={6}>
+                                            <Col sm={12}>
                                                 <Form.Group className="mb-3">
                                                     <Form.Label className={localizedLabelAlignClass}>{localizedLocationLabel}</Form.Label>
                                                     <Form.Control
@@ -316,18 +335,29 @@ const AdminEditProfile = () => {
                                         <Row className="gx-3">
                                             <Col sm={12}>
                                                 <Form.Group className="mb-3">
+                                                    <Form.Label>{translationLocale === 'ar' ? (copy.websiteAr || 'الموقع الإلكتروني') : (copy.website || 'Website')}</Form.Label>
+                                                    <Form.Control
+                                                        dir={translationLocale === 'ar' ? 'rtl' : 'ltr'}
+                                                        value={formState.personalWebsite || formState.website || ''}
+                                                        onChange={(e) => {
+                                                            setField('personalWebsite', e.target.value);
+                                                            setField('website', e.target.value);
+                                                        }}
+                                                    />
+                                                </Form.Group>
+                                            </Col>
+                                        </Row>
+
+                                        <Row className="gx-3">
+                                            <Col sm={12}>
+                                                <Form.Group className="mb-3">
                                                     <Form.Label className={localizedLabelAlignClass}>{localizedBioLabel}</Form.Label>
                                                     <Form.Control
                                                         as="textarea"
                                                         rows={5}
                                                         dir={translationLocale === 'ar' ? 'rtl' : 'ltr'}
                                                         value={getLocalizedValue(formState.bio, translationLocale)}
-                                                        onChange={(e) =>
-                                                            setField('bio', {
-                                                                ...(formState.bio || {}),
-                                                                [translationLocale]: e.target.value,
-                                                            })
-                                                        }
+                                                        onChange={(e) => setField('bio', { ...(formState.bio || {}), [translationLocale]: e.target.value })}
                                                     />
                                                 </Form.Group>
                                             </Col>
@@ -342,7 +372,6 @@ const AdminEditProfile = () => {
                                                     <Form.Control value={formState.email} onChange={(e) => setField('email', e.target.value)} />
                                                 </Form.Group>
                                             </Col>
-
                                             <Col sm={6}>
                                                 <Form.Group className="mb-3">
                                                     <Form.Label>{copy.phone}</Form.Label>
@@ -353,56 +382,61 @@ const AdminEditProfile = () => {
                                     </Tab.Pane>
 
                                     <Tab.Pane eventKey="tabBlock3">
+                                        <Row className="gx-3">
+                                            {SOCIAL_LINK_FIELDS.map((item) => (
+                                                <Col sm={6} key={item.key}>
+                                                    <Form.Group className="mb-3">
+                                                        <Form.Label>{isArabic ? item.label.ar : item.label.en}</Form.Label>
+                                                        <Form.Control
+                                                            value={formState.socialLinks?.[item.key] || ''}
+                                                            onChange={(e) => setField('socialLinks', {
+                                                                ...(formState.socialLinks || {}),
+                                                                [item.key]: e.target.value,
+                                                            })}
+                                                        />
+                                                    </Form.Group>
+                                                </Col>
+                                            ))}
+                                        </Row>
+                                    </Tab.Pane>
+
+                                    <Tab.Pane eventKey="tabBlock4">
                                         <div className="title-lg fs-4"><span>{securityTabLabel}</span></div>
-                                        <p className="mb-4 text-muted">
-                                            {copy.securitySubtitle || (isArabic ? 'تحكم في كلمة المرور والتحقق بخطوتين لحماية الحساب.' : 'Control password and 2-step verification settings for account protection.')}
-                                        </p>
+                                        <p className="mb-4 text-muted">{copy.securitySubtitle || 'Control password and 2-step verification settings for account protection.'}</p>
 
                                         <div className="border rounded-3 p-3 bg-light-subtle mb-4">
                                             <div className="title-xs text-primary text-uppercase mb-3">
-                                                <span>{copy.passwordSectionTitle || (isArabic ? 'كلمة المرور' : 'Password')}</span>
+                                                <span>{copy.passwordSectionTitle || 'Password'}</span>
                                             </div>
-
                                             <Row className="gx-3">
                                                 <Col sm={12}>
                                                     <Form.Group className="mb-3">
                                                         <Form.Label>{copy.oldPassword}</Form.Label>
-                                                        <Form.Control
-                                                            type="password"
-                                                            value={passwordForm.oldPassword}
-                                                            onChange={(e) => setPasswordField('oldPassword', e.target.value)}
-                                                        />
+                                                        <Form.Control type="password" value={passwordForm.oldPassword} onChange={(e) => setPasswordField('oldPassword', e.target.value)} />
                                                     </Form.Group>
                                                 </Col>
-
                                                 <Col sm={6}>
                                                     <Form.Group className="mb-3">
                                                         <Form.Label>{copy.newPassword}</Form.Label>
-                                                        <Form.Control
-                                                            type="password"
-                                                            value={passwordForm.newPassword}
-                                                            onChange={(e) => setPasswordField('newPassword', e.target.value)}
-                                                        />
+                                                        <Form.Control type="password" value={passwordForm.newPassword} onChange={(e) => setPasswordField('newPassword', e.target.value)} />
                                                     </Form.Group>
                                                 </Col>
-
                                                 <Col sm={6}>
                                                     <Form.Group className="mb-3">
                                                         <Form.Label>{copy.confirmPassword}</Form.Label>
-                                                        <Form.Control
-                                                            type="password"
-                                                            value={passwordForm.confirmPassword}
-                                                            onChange={(e) => setPasswordField('confirmPassword', e.target.value)}
-                                                        />
+                                                        <Form.Control type="password" value={passwordForm.confirmPassword} onChange={(e) => setPasswordField('confirmPassword', e.target.value)} />
                                                     </Form.Group>
                                                 </Col>
                                             </Row>
+                                            <Button type="button" variant="soft-primary" onClick={handlePasswordUpdate}>
+                                                {copy.passwordUpdateButton || 'Update Password'}
+                                            </Button>
                                         </div>
 
                                         <div className="border rounded-3 p-3 bg-light-subtle mb-4">
                                             <div className="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
                                                 <div className="title-xs text-primary text-uppercase mb-0">
-                                                    <span>{copy.twoFactorSectionTitle || (isArabic ? 'التحقق بخطوتين' : '2-Step Verification')}</span>
+                                                    <span>{copy.twoFactorSectionTitle || '2-Step Verification'}</span>
                                                 </div>
                                                 <Form.Check
                                                     type="switch"
@@ -411,49 +445,36 @@ const AdminEditProfile = () => {
                                                     checked={Boolean(formState.twoFactorEnabled)}
                                                     onChange={(e) => openOtpModalForToggle(e.target.checked)}
                                                     label={formState.twoFactorEnabled
-                                                        ? (copy.twoFactorStatusActive || (isArabic ? 'مفعل' : 'Active'))
-                                                        : (copy.twoFactorStatusInactive || (isArabic ? 'غير مفعل' : 'Inactive'))}
+                                                        ? (copy.twoFactorStatusActive || 'Active')
+                                                        : (copy.twoFactorStatusInactive || 'Inactive')}
                                                 />
                                             </div>
 
                                             <Row className="gx-3">
                                                 <Col sm={6}>
                                                     <Form.Group className="mb-3">
-                                                        <Form.Label>{copy.twoFactorMethodLabel || (isArabic ? 'طريقة التحقق' : 'Verification Method')}</Form.Label>
-                                                        <Form.Select value={twoFactorDraft.method} onChange={(e) => setTwoFactorDraftField('method', e.target.value)}>
-                                                            <option value="email">{copy.twoFactorMethodEmail || (isArabic ? 'البريد الإلكتروني' : 'Email')}</option>
-                                                            <option value="sms">{copy.twoFactorMethodSms || 'SMS'}</option>
-                                                        </Form.Select>
+                                                        <Form.Label>{copy.twoFactorMethodLabel || 'Verification Method'}</Form.Label>
+                                                        <Form.Control value={copy.twoFactorMethodEmail || 'Email'} readOnly />
                                                     </Form.Group>
                                                 </Col>
                                                 <Col sm={6}>
-                                                    {twoFactorDraft.method === 'sms' ? (
-                                                        <Form.Group className="mb-3">
-                                                            <Form.Label>{copy.twoFactorPhoneLabel || (isArabic ? 'رقم الهاتف' : 'Phone Number')}</Form.Label>
-                                                            <Form.Control type="text" value={twoFactorDraft.phone} onChange={(e) => setTwoFactorDraftField('phone', e.target.value)} />
-                                                        </Form.Group>
-                                                    ) : (
-                                                        <Form.Group className="mb-3">
-                                                            <Form.Label>{copy.twoFactorEmailLabel || copy.email}</Form.Label>
-                                                            <Form.Control type="email" value={twoFactorDraft.email} onChange={(e) => setTwoFactorDraftField('email', e.target.value)} />
-                                                        </Form.Group>
-                                                    )}
+                                                    <Form.Group className="mb-3">
+                                                        <Form.Label>{copy.twoFactorEmailLabel || copy.email}</Form.Label>
+                                                        <Form.Control type="email" value={formState.twoFactorEmail || formState.email || ''} readOnly />
+                                                    </Form.Group>
                                                 </Col>
                                             </Row>
 
-                                            {twoFactorError ? <div className="text-danger fs-8 mb-3">{twoFactorError}</div> : null}
                                             {twoFactorNotice ? <div className="text-success fs-8 mb-3">{twoFactorNotice}</div> : null}
-
-                                            <Button type="button" variant="soft-primary" onClick={openOtpModalForSettings}>
-                                                {copy.twoFactorUpdateButton || (isArabic ? 'تحديث التحقق بخطوتين' : 'Update 2-Step Verification')}
-                                            </Button>
                                         </div>
                                     </Tab.Pane>
                                 </Tab.Content>
 
-                                <Button variant="primary" type="submit" className="mt-5">
-                                    {copy.saveChanges}
-                                </Button>
+                                {activeTab !== 'tabBlock4' ? (
+                                    <Button variant="primary" type="submit" className="mt-5">
+                                        {copy.saveChanges}
+                                    </Button>
+                                ) : null}
                             </Form>
                         </Col>
                     </Row>
@@ -462,14 +483,10 @@ const AdminEditProfile = () => {
 
             <Modal show={otpModal.show} onHide={closeOtpModal} centered>
                 <Modal.Header closeButton>
-                    <Modal.Title>{copy.twoFactorOtpTitle || (isArabic ? 'التحقق من رمز OTP' : 'Verify OTP')}</Modal.Title>
+                    <Modal.Title>{copy.twoFactorOtpTitle || 'Verify OTP'}</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <p className="text-muted mb-3">
-                        {otpModal.mode === 'settings'
-                            ? (copy.twoFactorOtpPromptSettings || (isArabic ? 'أدخل رمز OTP لتطبيق إعدادات التحقق بخطوتين.' : 'Enter the OTP to apply 2-step verification settings.'))
-                            : (copy.twoFactorOtpPromptToggle || (isArabic ? 'أدخل رمز OTP لتحديث حالة التحقق بخطوتين.' : 'Enter the OTP to update 2-step verification status.'))}
-                    </p>
+                    <p className="text-muted mb-3">{copy.twoFactorOtpPromptToggle || 'Enter the OTP to update 2-step verification status.'}</p>
                     <Form.Group className="mb-2">
                         <Form.Label>{copy.twoFactorOtpLabel || 'OTP Code'}</Form.Label>
                         <Form.Control
@@ -486,10 +503,10 @@ const AdminEditProfile = () => {
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="outline-light" onClick={closeOtpModal}>
-                        {copy.twoFactorOtpCancel || (isArabic ? 'إلغاء' : 'Cancel')}
+                        {copy.twoFactorOtpCancel || 'Cancel'}
                     </Button>
                     <Button variant="primary" onClick={verifyTwoFactorOtp}>
-                        {copy.twoFactorOtpVerify || (isArabic ? 'تحقق' : 'Verify')}
+                        {copy.twoFactorOtpVerify || 'Verify'}
                     </Button>
                 </Modal.Footer>
             </Modal>
