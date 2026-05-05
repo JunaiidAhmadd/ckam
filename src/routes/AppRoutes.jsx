@@ -3,9 +3,15 @@ import { Redirect, Route, Switch } from 'react-router-dom';
 import LayoutClassic from '../layout/MainLayout/ClassicLayout';
 import { routes } from './RouteList';
 import { CkamAdminProvider } from '../views/CkamAdmin/context';
+import { getAdminToken } from '../api/authSession';
 
 const AppRoutes = (props) => {
     const { match } = props;
+    const hasToken = Boolean(getAdminToken());
+
+    if (!hasToken) {
+        return <Redirect to="/auth/login" />;
+    }
 
     return (
         <CkamAdminProvider>

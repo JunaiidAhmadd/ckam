@@ -50,6 +50,12 @@ export const adminAuthApi = {
       method: 'POST',
       body: JSON.stringify({ email, password }),
     });
+
+    const token = extractToken(payload);
+    const user = extractUser(payload);
+    if (token) setAdminToken(token);
+    if (user) setAuthUser(user);
+
     return payload;
   },
 

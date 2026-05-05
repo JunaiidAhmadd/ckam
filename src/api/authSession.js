@@ -1,5 +1,6 @@
 const ADMIN_TOKEN_KEY = 'ckam:admin:token';
 const ADMIN_USER_KEY = 'ckam:admin:user';
+const ADMIN_TWO_FACTOR_KEY = 'ckam:admin:two-factor-enabled';
 
 const safeParse = (value, fallback = null) => {
     if (!value) return fallback;
@@ -27,6 +28,16 @@ export const setAdminToken = (token) => {
 export const clearAdminToken = () => {
     if (typeof window === 'undefined') return;
     window.localStorage.removeItem(ADMIN_TOKEN_KEY);
+};
+
+export const getAdminTwoFactorEnabled = () => {
+    if (typeof window === 'undefined') return false;
+    return window.localStorage.getItem(ADMIN_TWO_FACTOR_KEY) === 'true';
+};
+
+export const setAdminTwoFactorEnabled = (enabled) => {
+    if (typeof window === 'undefined') return;
+    window.localStorage.setItem(ADMIN_TWO_FACTOR_KEY, enabled ? 'true' : 'false');
 };
 
 export const getAuthUser = () => {

@@ -4,6 +4,7 @@ import { Link, useHistory } from 'react-router-dom';
 import { useCkamAdmin } from './context';
 import { adminCopy, getLocalizedValue } from './localization/i18n';
 import { normalizeTranslationLocale, TranslationViewSelect, useAdminPageSetup } from './shared';
+import { setAdminTwoFactorEnabled } from '../../api/authSession';
 import './AdminEditProfile.css';
 
 const readFileAsDataUrl = (file) => new Promise((resolve, reject) => {
@@ -16,7 +17,7 @@ const readFileAsDataUrl = (file) => new Promise((resolve, reject) => {
 const buildAdminFormState = (profile) => ({
     ...(profile || {}),
     twoFactorEnabled: profile?.twoFactorEnabled ?? false,
-    twoFactorMethod: profile?.twoFactorMethod === 'sms' ? 'sms' : 'email',
+    twoFactorMethod: 'email',
     twoFactorEmail: profile?.twoFactorEmail || profile?.email || '',
     twoFactorPhone: profile?.twoFactorPhone || profile?.phone || '',
 });
@@ -42,7 +43,7 @@ const AdminEditProfile = () => {
     const localizedLocationLabel = translationLocale === 'ar' ? 'الموقع' : 'Location';
     const localizedBioLabel = translationLocale === 'ar' ? 'نبذة' : 'Bio';
     const [twoFactorDraft, setTwoFactorDraft] = useState({
-        method: formState.twoFactorMethod === 'sms' ? 'sms' : 'email',
+        method: 'email',
         email: formState.twoFactorEmail || formState.email || '',
         phone: formState.twoFactorPhone || formState.phone || '',
     });
@@ -61,7 +62,7 @@ const AdminEditProfile = () => {
         const nextState = buildAdminFormState(adminProfile);
         setFormState(nextState);
         setTwoFactorDraft({
-            method: nextState.twoFactorMethod === 'sms' ? 'sms' : 'email',
+            method: 'email',
             email: nextState.twoFactorEmail || nextState.email || '',
             phone: nextState.twoFactorPhone || nextState.phone || '',
         });
@@ -114,16 +115,12 @@ const AdminEditProfile = () => {
     };
 
     const openOtpModalForSettings = () => {
-        const method = twoFactorDraft.method === 'sms' ? 'sms' : 'email';
-        const targetValue = method === 'sms'
-            ? String(twoFactorDraft.phone || '').trim()
-            : String(twoFactorDraft.email || '').trim();
+        const method = 'email';
+        const targetValue = String(twoFactorDraft.email || '').trim();
 
         if (!targetValue) {
             setTwoFactorError(
-                method === 'sms'
-                    ? (copy.twoFactorPhoneRequired || 'Phone number is required for SMS verification.')
-                    : (copy.twoFactorEmailRequired || 'Email is required for email verification.')
+                copy.twoFactorEmailRequired || 'Email is required for email verification.'
             );
             return;
         }
@@ -139,7 +136,7 @@ const AdminEditProfile = () => {
             settings: {
                 method,
                 email: String(twoFactorDraft.email || '').trim(),
-                phone: String(twoFactorDraft.phone || '').trim(),
+                phone: '',
             },
         });
     };
@@ -185,6 +182,7 @@ const AdminEditProfile = () => {
 
     const handleSubmit = (event) => {
         event.preventDefault();
+        setAdminTwoFactorEnabled(Boolean(formState.twoFactorEnabled));
         saveAdminProfile(formState);
         history.push('/admin/profile');
     };
@@ -420,24 +418,16 @@ const AdminEditProfile = () => {
                                                 <Col sm={6}>
                                                     <Form.Group className="mb-3">
                                                         <Form.Label>{copy.twoFactorMethodLabel || (isArabic ? 'طريقة التحقق' : 'Verification Method')}</Form.Label>
-                                                        <Form.Select value={twoFactorDraft.method} onChange={(e) => setTwoFactorDraftField('method', e.target.value)}>
+                                                        <Form.Select value="email" disabled>
                                                             <option value="email">{copy.twoFactorMethodEmail || (isArabic ? 'البريد الإلكتروني' : 'Email')}</option>
-                                                            <option value="sms">{copy.twoFactorMethodSms || 'SMS'}</option>
                                                         </Form.Select>
                                                     </Form.Group>
                                                 </Col>
                                                 <Col sm={6}>
-                                                    {twoFactorDraft.method === 'sms' ? (
-                                                        <Form.Group className="mb-3">
-                                                            <Form.Label>{copy.twoFactorPhoneLabel || (isArabic ? 'رقم الهاتف' : 'Phone Number')}</Form.Label>
-                                                            <Form.Control type="text" value={twoFactorDraft.phone} onChange={(e) => setTwoFactorDraftField('phone', e.target.value)} />
-                                                        </Form.Group>
-                                                    ) : (
-                                                        <Form.Group className="mb-3">
-                                                            <Form.Label>{copy.twoFactorEmailLabel || copy.email}</Form.Label>
-                                                            <Form.Control type="email" value={twoFactorDraft.email} onChange={(e) => setTwoFactorDraftField('email', e.target.value)} />
-                                                        </Form.Group>
-                                                    )}
+                                                    <Form.Group className="mb-3">
+                                                        <Form.Label>{copy.twoFactorEmailLabel || copy.email}</Form.Label>
+                                                        <Form.Control type="email" value={twoFactorDraft.email} readOnly />
+                                                    </Form.Group>
                                                 </Col>
                                             </Row>
 
