@@ -6,6 +6,7 @@ import { adminAuthApi } from '../../api/adminAuth';
 import { useCkamAdmin } from './context';
 import { adminCopy, getLocalizedValue } from './localization/i18n';
 import { normalizeTranslationLocale, TranslationViewSelect, useAdminPageSetup } from './shared';
+import { setAdminTwoFactorEnabled } from '../../api/authSession';
 import './AdminEditProfile.css';
 
 const SOCIAL_LINK_FIELDS = [
@@ -56,12 +57,15 @@ const AdminEditProfile = () => {
     });
     const [translationLocale, setTranslationLocale] = useState(normalizeTranslationLocale(locale));
     const localizedLabelAlignClass = translationLocale === 'ar' ? 'text-end d-block' : 'text-start d-block';
-    const localizedLocationLabel = translationLocale === 'ar'
-        ? (copy.locationAr || 'الموقع')
-        : (copy.location || 'Location');
-    const localizedBioLabel = translationLocale === 'ar'
-        ? (copy.bioAr || 'نبذة')
-        : (copy.bio || 'Bio');
+    const localizedRoleLabel = translationLocale === 'ar' ? 'الدور' : 'Role';
+    const localizedLocationLabel = translationLocale === 'ar' ? 'الموقع' : 'Location';
+    const localizedBioLabel = translationLocale === 'ar' ? 'نبذة' : 'Bio';
+    const [twoFactorDraft, setTwoFactorDraft] = useState({
+        method: formState.twoFactorMethod === 'sms' ? 'sms' : 'email',
+        email: formState.twoFactorEmail || formState.email || '',
+        phone: formState.twoFactorPhone || formState.phone || '',
+    });
+    const [twoFactorError, setTwoFactorError] = useState('');
     const [twoFactorNotice, setTwoFactorNotice] = useState('');
     const [otpCode, setOtpCode] = useState('');
     const [otpError, setOtpError] = useState('');
@@ -79,6 +83,12 @@ const AdminEditProfile = () => {
     useEffect(() => {
         const nextState = buildAdminFormState(adminProfile);
         setFormState(nextState);
+        setTwoFactorDraft({
+            method: nextState.twoFactorMethod === 'sms' ? 'sms' : 'email',
+            email: nextState.twoFactorEmail || nextState.email || '',
+            phone: nextState.twoFactorPhone || nextState.phone || '',
+        });
+        setTwoFactorError('');
         setTwoFactorNotice('');
         setOtpCode('');
         setOtpError('');
@@ -103,22 +113,43 @@ const AdminEditProfile = () => {
     const openOtpModalForToggle = async (nextEnabled) => {
         setOtpError('');
         setOtpCode('');
+        setOtpModal({
+            show: true,
+            mode: 'toggle',
+            nextEnabled: Boolean(nextEnabled),
+            settings: null,
+        });
+    };
 
-        try {
-            const payload = await adminAuthApi.updateTwoFactor({
-                enabled: Boolean(nextEnabled),
-                channel: 'email',
-            });
+    const openOtpModalForSettings = () => {
+        const method = twoFactorDraft.method === 'sms' ? 'sms' : 'email';
+        const targetValue = method === 'sms'
+            ? String(twoFactorDraft.phone || '').trim()
+            : String(twoFactorDraft.email || '').trim();
 
-            setTwoFactorNotice(payload?.message || copy.twoFactorOtpPromptToggle || 'OTP sent successfully.');
-            toast.success(payload?.message || 'OTP sent successfully.');
-            setOtpModal({
-                show: true,
-                nextEnabled: Boolean(nextEnabled),
-            });
-        } catch (error) {
-            toast.error(error.message || 'Unable to update 2-step verification.');
+        if (!targetValue) {
+            setTwoFactorError(
+                method === 'sms'
+                    ? (copy.twoFactorPhoneRequired || 'Phone number is required for SMS verification.')
+                    : (copy.twoFactorEmailRequired || 'Email is required for email verification.')
+            );
+            return;
         }
+
+        setTwoFactorError('');
+        setTwoFactorNotice('');
+        setOtpError('');
+        setOtpCode('');
+        setOtpModal({
+            show: true,
+            mode: 'settings',
+            nextEnabled: formState.twoFactorEnabled,
+            settings: {
+                method,
+                email: String(twoFactorDraft.email || '').trim(),
+                phone: String(twoFactorDraft.phone || '').trim(),
+            },
+        });
     };
 
     const closeOtpModal = () => {
@@ -187,40 +218,8 @@ const AdminEditProfile = () => {
 
     const handleSubmit = async (event) => {
         event.preventDefault();
-
-        try {
-            let response = null;
-
-            if (activeTab === 'tabBlock1') {
-                response = await adminAuthApi.updatePublicProfile({
-                    first_name: formState.firstName || '',
-                    last_name: formState.lastName || '',
-                    location: formState.location || '',
-                    bio: formState.bio?.en || '',
-                    personal_website: formState.personalWebsite || formState.website || '',
-                    image: formState.avatar || formState.imageUrl || '',
-                });
-            } else if (activeTab === 'tabBlock2') {
-                response = await adminAuthApi.updateAccountSettings({
-                    email: formState.email || '',
-                    phone: formState.phone || '',
-                });
-            } else if (activeTab === 'tabBlock3') {
-                response = await adminAuthApi.updateSocialLinks(
-                    SOCIAL_LINK_FIELDS.reduce((accumulator, item) => ({
-                        ...accumulator,
-                        [item.key]: formState.socialLinks?.[item.key] || '',
-                    }), {})
-                );
-            } else {
-                return;
-            }
-
-            await fetchAdminProfile();
-            toast.success(response?.message || copy.profileSaved || 'Settings updated successfully.');
-        } catch (error) {
-            toast.error(error.message || 'Unable to update settings.');
-        }
+        saveAdminProfile(formState);
+        history.push('/admin/profile');
     };
 
     return (
@@ -453,15 +452,25 @@ const AdminEditProfile = () => {
                                             <Row className="gx-3">
                                                 <Col sm={6}>
                                                     <Form.Group className="mb-3">
-                                                        <Form.Label>{copy.twoFactorMethodLabel || 'Verification Method'}</Form.Label>
-                                                        <Form.Control value={copy.twoFactorMethodEmail || 'Email'} readOnly />
+                                                        <Form.Label>{copy.twoFactorMethodLabel || (isArabic ? 'طريقة التحقق' : 'Verification Method')}</Form.Label>
+                                                        <Form.Select value={twoFactorDraft.method} onChange={(e) => setTwoFactorDraftField('method', e.target.value)}>
+                                                            <option value="email">{copy.twoFactorMethodEmail || (isArabic ? 'البريد الإلكتروني' : 'Email')}</option>
+                                                            <option value="sms">{copy.twoFactorMethodSms || 'SMS'}</option>
+                                                        </Form.Select>
                                                     </Form.Group>
                                                 </Col>
                                                 <Col sm={6}>
-                                                    <Form.Group className="mb-3">
-                                                        <Form.Label>{copy.twoFactorEmailLabel || copy.email}</Form.Label>
-                                                        <Form.Control type="email" value={formState.twoFactorEmail || formState.email || ''} readOnly />
-                                                    </Form.Group>
+                                                    {twoFactorDraft.method === 'sms' ? (
+                                                        <Form.Group className="mb-3">
+                                                            <Form.Label>{copy.twoFactorPhoneLabel || (isArabic ? 'رقم الهاتف' : 'Phone Number')}</Form.Label>
+                                                            <Form.Control type="text" value={twoFactorDraft.phone} onChange={(e) => setTwoFactorDraftField('phone', e.target.value)} />
+                                                        </Form.Group>
+                                                    ) : (
+                                                        <Form.Group className="mb-3">
+                                                            <Form.Label>{copy.twoFactorEmailLabel || copy.email}</Form.Label>
+                                                            <Form.Control type="email" value={twoFactorDraft.email} onChange={(e) => setTwoFactorDraftField('email', e.target.value)} />
+                                                        </Form.Group>
+                                                    )}
                                                 </Col>
                                             </Row>
 

@@ -4,6 +4,7 @@ import { hasAdminToken } from '../api/authSession';
 import LayoutClassic from '../layout/MainLayout/ClassicLayout';
 import { authRoutes, routes } from './RouteList';
 import { CkamAdminProvider } from '../views/CkamAdmin/context';
+import { getAdminToken } from '../api/authSession';
 
 const ProtectedAdminRoute = ({ component: Component, ...rest }) => (
     <Route
@@ -25,6 +26,11 @@ const ProtectedAdminRoute = ({ component: Component, ...rest }) => (
 
 const AppRoutes = (props) => {
     const { match } = props;
+    const hasToken = Boolean(getAdminToken());
+
+    if (!hasToken) {
+        return <Redirect to="/auth/login" />;
+    }
 
     return (
         <CkamAdminProvider>
