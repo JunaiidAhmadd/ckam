@@ -100,8 +100,12 @@ const WebsiteBuilderForm = ({
       setOpenSectionIds([]);
       return;
     }
-    setOpenSectionIds([sections[0].id]);
-  }, [sectionSignature, sections]);
+    setOpenSectionIds((previous) => {
+      const activeId = previous.find((id) => sections.some((section) => section.id === id));
+      if (activeId) return [activeId];
+      return [sections[0].id];
+    });
+  }, [sectionSignature]);
 
   useEffect(() => {
     setTranslationLocale(normalizeTranslationLocale(activeLocale));
@@ -201,10 +205,14 @@ const WebsiteBuilderForm = ({
               onTranslationLocaleChange={setTranslationLocale}
             >
               {(() => {
+                const sourceFields = section.fields || [];
+                const sectionAllowedFieldKeys = Array.isArray(section?.allowedFieldKeys)
+                  ? section.allowedFieldKeys
+                  : null;
                 const previewKeys = getPreviewBoundFieldKeys(page?.id, section.id);
-                const visibleFields = previewKeys == null
-                  ? (section.fields || [])
-                  : (section.fields || []).filter((f) => previewKeys.includes(f.key));
+                const visibleFields = sectionAllowedFieldKeys
+                  ? sourceFields.filter((field) => sectionAllowedFieldKeys.includes(field.key))
+                  : (previewKeys == null ? sourceFields : sourceFields.filter((field) => previewKeys.includes(field.key)));
 
                 if (visibleFields.length === 0 && previewKeys?.length === 0) {
                   return (

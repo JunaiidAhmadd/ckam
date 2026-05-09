@@ -13,7 +13,8 @@ const safeParse = (value, fallback = null) => {
 
 export const getAdminToken = () => {
     if (typeof window === 'undefined') return '';
-    return window.localStorage.getItem(ADMIN_TOKEN_KEY) || '';
+    const rawToken = window.localStorage.getItem(ADMIN_TOKEN_KEY) || '';
+    return rawToken.replace(/^Bearer\s+/i, '').trim();
 };
 
 export const hasAdminToken = () => Boolean(getAdminToken());
@@ -24,7 +25,7 @@ export const setAdminToken = (token) => {
         window.localStorage.removeItem(ADMIN_TOKEN_KEY);
         return;
     }
-    window.localStorage.setItem(ADMIN_TOKEN_KEY, String(token));
+    window.localStorage.setItem(ADMIN_TOKEN_KEY, String(token).replace(/^Bearer\s+/i, '').trim());
 };
 
 export const clearAdminToken = () => {

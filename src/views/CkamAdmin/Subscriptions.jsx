@@ -1,6 +1,7 @@
-﻿import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Button, Card, Col, Form, Modal, Row } from 'react-bootstrap';
 import { DollarSign, Edit2, Percent, Trash2, X } from 'react-feather';
+import { toast } from 'react-toastify';
 import { useCkamAdmin } from './context';
 import { adminCopy, getAdminIntl, getLocalizedList, getLocalizedValue, getStatusLabel } from './localization/i18n';
 import {
@@ -22,17 +23,17 @@ const getCycleOptions = (copy) => [
 
 const getBlankPlan = () => ({
     id: '',
-    name: { en: 'New Plan', ar: 'خطة جديدة' },
+    name: { en: 'New Plan', ar: '\u062e\u0637\u0629 \u062c\u062f\u064a\u062f\u0629' },
     price: 49,
     billingCycle: 'monthly',
     billingLabel: { en: adminCopy.en.subscriptionsPage.billedMonthly, ar: adminCopy.ar.subscriptionsPage.billedMonthly },
     trialDays: 14,
     activeSubscribers: 0,
     status: 'published',
-    description: { en: 'Plan description', ar: 'وصف الخطة' },
+    description: { en: 'Plan description', ar: '\u0648\u0635\u0641 \u0627\u0644\u062e\u0637\u0629' },
     features: {
         en: '1 team seat\nBasic onboarding\nLead capture',
-        ar: 'مقعد فريق واحد\nتهيئة أساسية\nالتقاط العملاء المحتملين',
+        ar: '\u0645\u0642\u0639\u062f \u0641\u0631\u064a\u0642 \u0648\u0627\u062d\u062f\n\u062a\u0647\u064a\u0626\u0629 \u0623\u0633\u0627\u0633\u064a\u0629\n\u0627\u0644\u062a\u0642\u0627\u0637 \u0627\u0644\u0639\u0645\u0644\u0627\u0621 \u0627\u0644\u0645\u062d\u062a\u0645\u0644\u064a\u0646',
     },
 });
 
@@ -47,7 +48,7 @@ const getBlankPromoCode = () => ({
     usageLimit: 100,
     usedCount: 0,
     status: 'draft',
-    description: { en: 'Promo code description', ar: 'وصف كود الخصم' },
+    description: { en: 'Promo code description', ar: '\u0648\u0635\u0641 \u0631\u0645\u0632 \u0627\u0644\u062e\u0635\u0645' },
 });
 
 const Subscriptions = () => {
@@ -64,18 +65,20 @@ const Subscriptions = () => {
     const formCycleOptions = useMemo(() => getCycleOptions(copy), [copy]);
     const [formState, setFormState] = useState(getBlankPlan());
     const [showPlanModal, setShowPlanModal] = useState(false);
+    const [isSavingPlan, setIsSavingPlan] = useState(false);
+    const [deletingPlanId, setDeletingPlanId] = useState(null);
     const [promoFormState, setPromoFormState] = useState(getBlankPromoCode());
     const [showPromoModal, setShowPromoModal] = useState(false);
     const [planTranslationLocale, setPlanTranslationLocale] = useState(activeLocale);
     const [promoTranslationLocale, setPromoTranslationLocale] = useState(activeLocale);
     const planLabelAlignClass = planTranslationLocale === 'ar' ? 'text-end d-block' : 'text-start d-block';
     const promoLabelAlignClass = promoTranslationLocale === 'ar' ? 'text-end d-block' : 'text-start d-block';
-    const localizedPlanNameLabel = planTranslationLocale === 'ar' ? 'اسم الخطة' : 'Plan name';
-    const localizedDescriptionLabel = planTranslationLocale === 'ar' ? 'الوصف' : 'Description';
-    const localizedFeaturesLabel = planTranslationLocale === 'ar' ? 'المزايا' : 'Features';
-    const localizedOnePerLineHint = planTranslationLocale === 'ar' ? 'أضف ميزة واحدة في كل سطر.' : 'Add one feature per line.';
-    const localizedBillingLabel = planTranslationLocale === 'ar' ? 'تسمية الفوترة' : 'Billing label';
-    const localizedPromoDescriptionLabel = promoTranslationLocale === 'ar' ? 'وصف رمز الخصم' : 'Promo code description';
+    const localizedPlanNameLabel = planTranslationLocale === 'ar' ? '\u0627\u0633\u0645 \u0627\u0644\u062e\u0637\u0629' : 'Plan name';
+    const localizedDescriptionLabel = planTranslationLocale === 'ar' ? '\u0627\u0644\u0648\u0635\u0641' : 'Description';
+    const localizedFeaturesLabel = planTranslationLocale === 'ar' ? '\u0627\u0644\u0645\u0632\u0627\u064a\u0627' : 'Features';
+    const localizedOnePerLineHint = planTranslationLocale === 'ar' ? '\u0623\u0636\u0641 \u0645\u064a\u0632\u0629 \u0648\u0627\u062d\u062f\u0629 \u0641\u064a \u0643\u0644 \u0633\u0637\u0631.' : 'Add one feature per line.';
+    const localizedBillingLabel = planTranslationLocale === 'ar' ? '\u062a\u0633\u0645\u064a\u0629 \u0627\u0644\u0641\u0648\u062a\u0631\u0629' : 'Billing label';
+    const localizedPromoDescriptionLabel = promoTranslationLocale === 'ar' ? '\u0648\u0635\u0641 \u0631\u0645\u0632 \u0627\u0644\u062e\u0635\u0645' : 'Promo code description';
 
     const publishedPlans = plans.filter((plan) => plan.status === 'published').length;
     const yearlyPlans = plans.filter((plan) => plan.billingCycle === 'annual').length;
@@ -129,16 +132,59 @@ const Subscriptions = () => {
         setShowPlanModal(true);
     };
 
-    const handleSubmit = (event) => {
+    const handleSubmit = async (event) => {
         event.preventDefault();
-        savePlan(formState);
-        setFormState(getBlankPlan());
-        setShowPlanModal(false);
+        if (isSavingPlan) return;
+
+        const savingText = locale === 'ar' ? '\u062c\u0627\u0631\u064d \u062d\u0641\u0638 \u0627\u0644\u062e\u0637\u0629...' : 'Saving plan...';
+        const successText = formState.id ? formCopy.updatePlan : formCopy.createPlanAction;
+        const defaultErrorText = locale === 'ar' ? '\u062a\u0639\u0630\u0631 \u062d\u0641\u0638 \u0627\u0644\u062e\u0637\u0629.' : 'Unable to save plan.';
+        const toastId = toast.loading(savingText);
+
+        setIsSavingPlan(true);
+        const result = await savePlan(formState);
+
+        if (result?.ok) {
+            toast.update(toastId, {
+                render: successText,
+                type: 'success',
+                isLoading: false,
+                autoClose: 2500,
+            });
+            setFormState(getBlankPlan());
+            setShowPlanModal(false);
+        } else {
+            toast.update(toastId, {
+                render: result?.error || defaultErrorText,
+                type: 'error',
+                isLoading: false,
+                autoClose: 4500,
+            });
+        }
+
+        setIsSavingPlan(false);
     };
 
     const handleCloseModal = () => {
         setFormState(getBlankPlan());
         setShowPlanModal(false);
+    };
+
+    const handleDeletePlan = async (plan) => {
+        const planName = getLocalizedValue(plan?.name, locale) || (locale === 'ar' ? '\u0627\u0644\u062e\u0637\u0629' : 'this plan');
+        const warningText = locale === 'ar'
+            ? `\u0647\u0644 \u0623\u0646\u062a \u0645\u062a\u0623\u0643\u062f \u0645\u0646 \u062d\u0630\u0641 "${planName}"\u061f`
+            : `Are you sure you want to delete "${planName}"?`;
+
+        const confirmed = window.confirm(warningText);
+        if (!confirmed) return;
+
+        try {
+            setDeletingPlanId(plan.id);
+            await deletePlan(plan.id);
+        } finally {
+            setDeletingPlanId(null);
+        }
     };
 
     const handlePromoChange = (field, value) => {
@@ -319,7 +365,12 @@ const Subscriptions = () => {
                                                     <Button variant="outline-light" size="sm" onClick={() => handleEdit(plan)}>
                                                         <span className="d-inline-flex align-items-center gap-2"><Edit2 size={14} />{pageCopy.edit}</span>
                                                     </Button>
-                                                    <Button variant="outline-danger" size="sm" onClick={() => deletePlan(plan.id)}>
+                                                    <Button
+                                                        variant="outline-danger"
+                                                        size="sm"
+                                                        onClick={() => handleDeletePlan(plan)}
+                                                        disabled={deletingPlanId === plan.id}
+                                                    >
                                                         <span className="d-inline-flex align-items-center gap-2"><Trash2 size={14} />{pageCopy.delete}</span>
                                                     </Button>
                                                 </div>
@@ -398,7 +449,7 @@ const Subscriptions = () => {
                 </Row>
             </div>
 
-            <Modal show={showPlanModal} onHide={handleCloseModal} size="lg" centered className="ckam-plan-modal">
+            <Modal show={showPlanModal} onHide={isSavingPlan ? undefined : handleCloseModal} size="lg" centered className="ckam-plan-modal">
                 <Form onSubmit={handleSubmit} className="ckam-modal-form-ltr">
                     <Modal.Header closeButton className="ckam-modal-header">
                         <Modal.Title>{formState.id ? formCopy.editPlan : formCopy.createPlan}</Modal.Title>
@@ -473,13 +524,17 @@ const Subscriptions = () => {
                         </Row>
                     </Modal.Body>
                     <Modal.Footer>
-                        <Button variant="outline-light" onClick={handleCloseModal}>
+                        <Button variant="outline-light" onClick={handleCloseModal} disabled={isSavingPlan}>
                             <span className="d-inline-flex align-items-center gap-2">
                                 <X size={14} />
                                 {formCopy.cancelEdit}
                             </span>
                         </Button>
-                        <Button type="submit" variant="primary">{formState.id ? formCopy.updatePlan : formCopy.createPlanAction}</Button>
+                        <Button type="submit" variant="primary" disabled={isSavingPlan}>
+                            {isSavingPlan
+                                ? (locale === 'ar' ? '\u062c\u0627\u0631\u064d \u0627\u0644\u062d\u0641\u0638...' : 'Saving...')
+                                : (formState.id ? formCopy.updatePlan : formCopy.createPlanAction)}
+                        </Button>
                     </Modal.Footer>
                 </Form>
             </Modal>

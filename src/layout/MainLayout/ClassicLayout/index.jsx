@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import classNames from 'classnames';
 import { connect } from 'react-redux';
 import { useRouteMatch } from 'react-router-dom';
@@ -10,7 +10,6 @@ import { useWindowWidth } from '@react-hook/window-size';
 
 const LayoutClassic = ({ children, navCollapsed, topNavCollapsed, toggleCollapsedNav, maximize }) => {
 
-    const [dataHover, setDataHover] = useState(navCollapsed);
     const appRoutes = useRouteMatch('/apps/');
     const errro404Route = useRouteMatch('/error-404');
     const windowWidth = useWindowWidth();
@@ -23,13 +22,6 @@ const LayoutClassic = ({ children, navCollapsed, topNavCollapsed, toggleCollapse
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [windowWidth, appRoutes])
 
-    useEffect(() => {
-        setTimeout(() => {
-            setDataHover(navCollapsed);
-        }, 250);
-    }, [navCollapsed]);
-
-
     return (
         <div
             className={classNames("hk-wrapper", { "hk-pg-auth": errro404Route }, { "hk__email__backdrop": maximize })}
@@ -38,7 +30,7 @@ const LayoutClassic = ({ children, navCollapsed, topNavCollapsed, toggleCollapse
             data-navbar-style={topNavCollapsed ? "collapsed" : ""}
             data-menu="light"
             data-footer="simple"
-            data-hover={dataHover ? "active" : ""}
+            data-hover={navCollapsed ? "active" : ""}
         >
             {/* Top Navbar */}
             <TopNav />

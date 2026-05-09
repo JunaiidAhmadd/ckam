@@ -4,7 +4,7 @@ import {
   builderSchema,
   cloneDeep,
 } from '../model/schema';
-import { normalizeBuilderStateData } from '../model/normalizers';
+import { normalizeBuilderStateData, normalizePage } from '../model/normalizers';
 import { persistBuilderStateToStorage, readBuilderStateFromStorage } from '../model/storage';
 
 const pickFirstSectionId = (node) => node?.sections?.[0]?.id || '';
@@ -267,6 +267,24 @@ const reducer = (state, action) => {
     };
   }
 
+  if (action.type === 'APPLY_REMOTE_PAGE') {
+    const incomingPage = action?.page;
+    if (!incomingPage?.id) return state;
+
+    const currentPage = state.pages.find((page) => page.id === incomingPage.id);
+    if (!currentPage) return state;
+
+    const fallbackForRemote = {
+      ...currentPage,
+      sections: [],
+    };
+    const mergedPage = normalizePage(fallbackForRemote, incomingPage);
+    return {
+      ...state,
+      pages: state.pages.map((page) => (page.id === mergedPage.id ? mergedPage : page)),
+    };
+  }
+
   return state;
 };
 
@@ -361,6 +379,10 @@ export const BuilderProvider = ({ children, routeSlug }) => {
         type: 'UPDATE_THEME_CUSTOM_COLOR',
         colorKey,
         value: valueToSet,
+      }),
+      applyRemotePage: (page) => dispatch({
+        type: 'APPLY_REMOTE_PAGE',
+        page,
       }),
       save,
     };

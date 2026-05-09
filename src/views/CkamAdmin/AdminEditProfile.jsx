@@ -21,13 +21,6 @@ const SOCIAL_LINK_FIELDS = [
     { key: 'pinterest', label: { en: 'Pinterest', ar: 'بنترست' } },
 ];
 
-const readFileAsDataUrl = (file) => new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(String(reader.result || ''));
-    reader.onerror = () => reject(new Error('Failed to read file'));
-    reader.readAsDataURL(file);
-});
-
 const buildAdminFormState = (profile) => ({
     ...(profile || {}),
     socialLinks: {
@@ -42,7 +35,7 @@ const buildAdminFormState = (profile) => ({
 const AdminEditProfile = () => {
     useAdminPageSetup();
 
-    const { adminProfile, fetchAdminProfile, locale } = useCkamAdmin();
+    const { adminProfile, fetchAdminProfile, saveAdminProfile, locale } = useCkamAdmin();
     const [activeTab, setActiveTab] = useState('tabBlock1');
     const [formState, setFormState] = useState(buildAdminFormState(adminProfile));
     const copy = adminCopy[locale]?.adminEditProfile || adminCopy.en.adminEditProfile;
@@ -61,7 +54,7 @@ const AdminEditProfile = () => {
     const localizedLocationLabel = translationLocale === 'ar' ? 'الموقع' : 'Location';
     const localizedBioLabel = translationLocale === 'ar' ? 'نبذة' : 'Bio';
     const [twoFactorDraft, setTwoFactorDraft] = useState({
-        method: formState.twoFactorMethod === 'sms' ? 'sms' : 'email',
+        method: 'email',
         email: formState.twoFactorEmail || formState.email || '',
         phone: formState.twoFactorPhone || formState.phone || '',
     });
@@ -73,6 +66,7 @@ const AdminEditProfile = () => {
         show: false,
         nextEnabled: false,
     });
+    const [selectedProfileImageFile, setSelectedProfileImageFile] = useState(null);
 
     useEffect(() => {
         fetchAdminProfile().catch(() => {
@@ -84,7 +78,7 @@ const AdminEditProfile = () => {
         const nextState = buildAdminFormState(adminProfile);
         setFormState(nextState);
         setTwoFactorDraft({
-            method: nextState.twoFactorMethod === 'sms' ? 'sms' : 'email',
+            method: 'email',
             email: nextState.twoFactorEmail || nextState.email || '',
             phone: nextState.twoFactorPhone || nextState.phone || '',
         });
@@ -93,6 +87,7 @@ const AdminEditProfile = () => {
         setOtpCode('');
         setOtpError('');
         setOtpModal({ show: false, nextEnabled: false });
+        setSelectedProfileImageFile(null);
     }, [adminProfile]);
 
     useEffect(() => {
@@ -110,46 +105,46 @@ const AdminEditProfile = () => {
         setPasswordForm((current) => ({ ...current, [field]: value }));
     };
 
+    const setTwoFactorDraftField = (field, value) => {
+        setTwoFactorDraft((current) => ({ ...current, [field]: value }));
+    };
+
     const openOtpModalForToggle = async (nextEnabled) => {
         setOtpError('');
         setOtpCode('');
-        setOtpModal({
-            show: true,
-            mode: 'toggle',
-            nextEnabled: Boolean(nextEnabled),
-            settings: null,
-        });
-    };
-
-    const openOtpModalForSettings = () => {
-        const method = twoFactorDraft.method === 'sms' ? 'sms' : 'email';
-        const targetValue = method === 'sms'
-            ? String(twoFactorDraft.phone || '').trim()
-            : String(twoFactorDraft.email || '').trim();
-
-        if (!targetValue) {
-            setTwoFactorError(
-                method === 'sms'
-                    ? (copy.twoFactorPhoneRequired || 'Phone number is required for SMS verification.')
-                    : (copy.twoFactorEmailRequired || 'Email is required for email verification.')
-            );
-            return;
-        }
-
         setTwoFactorError('');
         setTwoFactorNotice('');
-        setOtpError('');
-        setOtpCode('');
-        setOtpModal({
-            show: true,
-            mode: 'settings',
-            nextEnabled: formState.twoFactorEnabled,
-            settings: {
-                method,
-                email: String(twoFactorDraft.email || '').trim(),
-                phone: String(twoFactorDraft.phone || '').trim(),
-            },
-        });
+
+        try {
+            const payload = await adminAuthApi.updateTwoFactor({
+                enabled: Boolean(nextEnabled),
+                channel: 'email',
+            });
+
+            if (payload?.verification_required) {
+                setOtpModal({
+                    show: true,
+                    mode: 'toggle',
+                    nextEnabled: Boolean(nextEnabled),
+                    settings: null,
+                });
+                setTwoFactorNotice(payload?.message || (copy.twoFactorOtpSent || 'OTP sent successfully.'));
+                return;
+            }
+
+            await fetchAdminProfile();
+            setAdminTwoFactorEnabled(Boolean(nextEnabled));
+            setTwoFactorNotice(
+                payload?.message
+                || (nextEnabled
+                    ? (copy.twoFactorEnabledNotice || 'Two-step verification is now active.')
+                    : (copy.twoFactorDisabledNotice || 'Two-step verification is now inactive.'))
+            );
+            toast.success(payload?.message || 'Two-step verification updated successfully.');
+        } catch (error) {
+            setTwoFactorError(error.message || 'Unable to update two-step verification.');
+            toast.error(error.message || 'Unable to update two-step verification.');
+        }
     };
 
     const closeOtpModal = () => {
@@ -170,6 +165,7 @@ const AdminEditProfile = () => {
         try {
             const payload = await adminAuthApi.verifyTwoFactor({ otp });
             await fetchAdminProfile();
+            setAdminTwoFactorEnabled(Boolean(otpModal.nextEnabled));
             setTwoFactorNotice(
                 payload?.message
                 || (otpModal.nextEnabled
@@ -187,8 +183,8 @@ const AdminEditProfile = () => {
     const handleAvatarUpload = async (event) => {
         const file = event.target.files?.[0];
         if (!file) return;
-        const dataUrl = await readFileAsDataUrl(file);
-        setField('avatar', dataUrl);
+        setSelectedProfileImageFile(file);
+        setField('avatar', URL.createObjectURL(file));
     };
 
     const handlePasswordUpdate = async () => {
@@ -218,8 +214,35 @@ const AdminEditProfile = () => {
 
     const handleSubmit = async (event) => {
         event.preventDefault();
-        saveAdminProfile(formState);
-        history.push('/admin/profile');
+        try {
+            if (activeTab === 'tabBlock1') {
+                await adminAuthApi.updatePublicProfileFormData({
+                    first_name: formState.firstName || '',
+                    last_name: formState.lastName || '',
+                    role: formState.role || 'admin',
+                    location: formState.location || '',
+                    bio: getLocalizedValue(formState.bio, 'en'),
+                    personal_website: formState.personalWebsite || formState.website || '',
+                    image: selectedProfileImageFile || null,
+                });
+            } else if (activeTab === 'tabBlock2') {
+                await adminAuthApi.updateAccountSettings({
+                    email: formState.email || '',
+                    phone: formState.phone || '',
+                });
+            } else if (activeTab === 'tabBlock3') {
+                await adminAuthApi.updateSocialLinks({
+                    ...(formState.socialLinks || {}),
+                });
+            } else {
+                await saveAdminProfile(formState);
+            }
+
+            await fetchAdminProfile();
+            toast.success(copy.profileSaved || 'Settings updated successfully.');
+        } catch (error) {
+            toast.error(error.message || 'Unable to update profile.');
+        }
     };
 
     return (
@@ -452,28 +475,21 @@ const AdminEditProfile = () => {
                                             <Row className="gx-3">
                                                 <Col sm={6}>
                                                     <Form.Group className="mb-3">
-                                                        <Form.Label>{copy.twoFactorMethodLabel || (isArabic ? 'طريقة التحقق' : 'Verification Method')}</Form.Label>
-                                                        <Form.Select value={twoFactorDraft.method} onChange={(e) => setTwoFactorDraftField('method', e.target.value)}>
-                                                            <option value="email">{copy.twoFactorMethodEmail || (isArabic ? 'البريد الإلكتروني' : 'Email')}</option>
-                                                            <option value="sms">{copy.twoFactorMethodSms || 'SMS'}</option>
+                                                        <Form.Label>{copy.twoFactorMethodLabel || "Verification Method"}</Form.Label>
+                                                        <Form.Select value={twoFactorDraft.method} onChange={(e) => setTwoFactorDraftField("method", e.target.value)} disabled>
+                                                            <option value="email">{copy.twoFactorMethodEmail || "Email"}</option>
                                                         </Form.Select>
                                                     </Form.Group>
                                                 </Col>
                                                 <Col sm={6}>
-                                                    {twoFactorDraft.method === 'sms' ? (
-                                                        <Form.Group className="mb-3">
-                                                            <Form.Label>{copy.twoFactorPhoneLabel || (isArabic ? 'رقم الهاتف' : 'Phone Number')}</Form.Label>
-                                                            <Form.Control type="text" value={twoFactorDraft.phone} onChange={(e) => setTwoFactorDraftField('phone', e.target.value)} />
-                                                        </Form.Group>
-                                                    ) : (
-                                                        <Form.Group className="mb-3">
-                                                            <Form.Label>{copy.twoFactorEmailLabel || copy.email}</Form.Label>
-                                                            <Form.Control type="email" value={twoFactorDraft.email} onChange={(e) => setTwoFactorDraftField('email', e.target.value)} />
-                                                        </Form.Group>
-                                                    )}
+                                                    <Form.Group className="mb-3">
+                                                        <Form.Label>{copy.twoFactorEmailLabel || copy.email}</Form.Label>
+                                                        <Form.Control type="email" value={twoFactorDraft.email} readOnly />
+                                                    </Form.Group>
                                                 </Col>
                                             </Row>
 
+                                            {twoFactorError ? <div className="text-danger fs-8 mb-3">{twoFactorError}</div> : null}
                                             {twoFactorNotice ? <div className="text-success fs-8 mb-3">{twoFactorNotice}</div> : null}
                                         </div>
                                     </Tab.Pane>

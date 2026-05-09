@@ -1,4 +1,5 @@
-export const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '');
+const RAW_API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '');
+export const API_BASE_URL = import.meta.env.DEV ? '' : RAW_API_BASE_URL;
 
 export const API_ENDPOINTS = {
   auth: {
@@ -19,16 +20,26 @@ export const API_ENDPOINTS = {
     slots: '/api/v1/booking/slots',
   },
   ckamAdmin: {
-    adminProfile: '/api/v1/ckam-admin/profile',
-    photographerProfile: (id) => `/api/v1/ckam-admin/photographers/${id}`,
-    photographerAccount: (id) => `/api/v1/ckam-admin/photographers/${id}/account-status`,
-    photographerTap: (id) => `/api/v1/ckam-admin/photographers/${id}/tap-status`,
-    plans: '/api/v1/ckam-admin/plans',
-    plan: (id) => `/api/v1/ckam-admin/plans/${id}`,
+    dashboard: '/api/admin/dashboard',
+    messages: '/api/admin/messages',
+    messageStatus: (id) => `/api/admin/messages/${id}/status`,
+    adminProfile: '/api/admin/profile',
+    photographers: '/api/admin/photographers',
+    photographerProfile: (id) => `/api/admin/photographers/${id}`,
+    photographerAccount: (id) => `/api/admin/photographers/${id}/status`,
+    photographerTap: (id) => `/api/admin/photographers/${id}/tap-status`,
+    plans: '/api/admin/plans',
+    plan: (id) => `/api/admin/plans/${id}`,
     promoCodes: '/api/v1/ckam-admin/promo-codes',
     promoCode: (id) => `/api/v1/ckam-admin/promo-codes/${id}`,
-    blogs: '/api/v1/ckam-admin/blogs',
-    blog: (id) => `/api/v1/ckam-admin/blogs/${id}`,
+    blogCategories: '/api/admin/site/blog-categories',
+    blogCategory: (id) => `/api/admin/site/blog-categories/${id}`,
+    blogs: '/api/admin/site/blogs',
+    blog: (id) => `/api/admin/site/blogs/${id}`,
+    blogSections: (id) => `/api/admin/site/blogs/${id}/sections`,
+    sitePages: '/api/admin/site/pages',
+    sitePageEdit: (slug) => `/api/admin/site/pages/${slug}/edit`,
+    sitePage: (slug) => `/api/admin/site/pages/${slug}`,
     websiteContentSection: (sectionId) => `/api/v1/ckam-admin/website-content/sections/${sectionId}`,
     websiteBrand: '/api/v1/ckam-admin/website-content/brand',
     waitlistStatus: (id) => `/api/v1/ckam-admin/waitlist/${id}/status`,

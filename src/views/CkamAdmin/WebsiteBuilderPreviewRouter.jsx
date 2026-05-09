@@ -143,6 +143,49 @@ const setNodeDisplay = (node, show) => {
     node.style.display = show ? '' : 'none';
 };
 
+const isValidHexColor = (value) => /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(String(value || '').trim());
+
+const applyLineValuesToNodes = (nodes, lines) => {
+    if (!nodes?.length) return;
+    nodes.forEach((node, index) => {
+        node.textContent = lines[index] || '';
+    });
+};
+
+const applySectionThemeStyles = (sectionNode, elementValues) => {
+    if (!sectionNode || !elementValues) return;
+
+    const textColor = isValidHexColor(elementValues.textColor) ? String(elementValues.textColor).trim() : '';
+    const backgroundColor = isValidHexColor(elementValues.backgroundColor) ? String(elementValues.backgroundColor).trim() : '';
+    const accentColor = isValidHexColor(elementValues.accentColor) ? String(elementValues.accentColor).trim() : '';
+    const buttonColor = isValidHexColor(elementValues.buttonColor) ? String(elementValues.buttonColor).trim() : '';
+    const buttonTextColor = isValidHexColor(elementValues.buttonTextColor) ? String(elementValues.buttonTextColor).trim() : '';
+
+    sectionNode.style.setProperty('--builder-section-accent', accentColor || '');
+    sectionNode.style.setProperty('--builder-section-text', textColor || '');
+    sectionNode.style.setProperty('--builder-section-bg', backgroundColor || '');
+    sectionNode.style.setProperty('--builder-section-button-bg', buttonColor || '');
+    sectionNode.style.setProperty('--builder-section-button-text', buttonTextColor || '');
+
+    if (textColor) {
+        sectionNode.style.color = textColor;
+    }
+    if (backgroundColor) {
+        sectionNode.style.backgroundColor = backgroundColor;
+    }
+
+    const buttonTargets = Array.from(sectionNode.querySelectorAll('[data-builder-button="primary"], [data-builder-button="secondary"], .client-btn'));
+    buttonTargets.forEach((node) => {
+        if (buttonColor) {
+            node.style.backgroundColor = buttonColor;
+            node.style.borderColor = buttonColor;
+        }
+        if (buttonTextColor) {
+            node.style.color = buttonTextColor;
+        }
+    });
+};
+
 const applyFieldBinding = (sectionNode, key, value) => {
     const targets = Array.from(sectionNode.querySelectorAll(`[data-builder-field="${key}"]`));
     targets.forEach((node) => {
@@ -151,6 +194,9 @@ const applyFieldBinding = (sectionNode, key, value) => {
         if (bindType === 'text') setNodeText(node, value);
         if (bindType === 'href') setNodeHref(node, value);
         if (bindType === 'src') setNodeSrc(node, value);
+        if (bindType === 'bg-image' && typeof value === 'string' && value.trim()) {
+            node.style.backgroundImage = `url("${value.trim()}")`;
+        }
     });
 };
 
@@ -225,11 +271,16 @@ const applySectionData = (sectionNode, sectionData, locale = 'en') => {
 
     const sectionId = sectionData.id || '';
     const elementValues = getSectionValues(sectionData, locale);
+    const itemTitleLines = builderValueToLines(elementValues.itemsTitles);
+    const itemDescriptionLines = builderValueToLines(elementValues.itemsDescriptions);
+    const itemImageLines = builderValueToLines(elementValues.itemImages);
+    const itemLinkLines = builderValueToLines(elementValues.itemLinks);
 
     // Handle visibility
     sectionNode.style.display = getSectionShow(sectionData) ? '' : 'none';
 
     Object.entries(elementValues).forEach(([key, value]) => applyFieldBinding(sectionNode, key, value));
+    applySectionThemeStyles(sectionNode, elementValues);
 
     const primaryVisible = elementValues.primaryButtonShow !== false;
     const secondaryVisible = elementValues.secondaryButtonShow !== false;
@@ -284,10 +335,21 @@ const applySectionData = (sectionNode, sectionData, locale = 'en') => {
         return true;
     });
     
-    if (actionNodes[0] && typeof elementValues.primaryButtonText === 'string' && elementValues.primaryButtonText.trim()) {
-        actionNodes[0].textContent = elementValues.primaryButtonText;
-        if (actionNodes[0].tagName.toLowerCase() === 'a' && typeof elementValues.primaryButtonUrl === 'string' && elementValues.primaryButtonUrl.trim()) {
-            actionNodes[0].setAttribute('href', elementValues.primaryButtonUrl);
+    const resolvedPrimaryButtonText = (
+        typeof elementValues.buttonText === 'string' && elementValues.buttonText.trim()
+            ? elementValues.buttonText
+            : elementValues.primaryButtonText
+    );
+    const resolvedPrimaryButtonUrl = (
+        typeof elementValues.buttonLink === 'string' && elementValues.buttonLink.trim()
+            ? elementValues.buttonLink
+            : elementValues.primaryButtonUrl
+    );
+
+    if (actionNodes[0] && typeof resolvedPrimaryButtonText === 'string' && resolvedPrimaryButtonText.trim()) {
+        actionNodes[0].textContent = resolvedPrimaryButtonText;
+        if (actionNodes[0].tagName.toLowerCase() === 'a' && typeof resolvedPrimaryButtonUrl === 'string' && resolvedPrimaryButtonUrl.trim()) {
+            actionNodes[0].setAttribute('href', resolvedPrimaryButtonUrl);
         }
     }
     
@@ -305,6 +367,45 @@ const applySectionData = (sectionNode, sectionData, locale = 'en') => {
         if (elementValues.title) {
             imageNode.setAttribute('alt', elementValues.title);
         }
+    }
+
+    if (sectionId === 'home_hero') {
+        const heroMedia = sectionNode.querySelector('.growth-media');
+        if (heroMedia && typeof elementValues.image === 'string' && elementValues.image.trim()) {
+            heroMedia.style.backgroundImage = `url("${elementValues.image.trim()}")`;
+        }
+        applyLineValuesToNodes(Array.from(sectionNode.querySelectorAll('.growth-points li')), itemTitleLines);
+    }
+
+    if (sectionId === 'home_provide') {
+        applyLineValuesToNodes(Array.from(sectionNode.querySelectorAll('.provide-item-label')), itemTitleLines);
+        const mockImage = sectionNode.querySelector('.mock-gallery img');
+        if (mockImage && itemImageLines[0]) {
+            mockImage.setAttribute('src', itemImageLines[0]);
+        }
+    }
+
+    if (sectionId === 'home_help') {
+        applyLineValuesToNodes(Array.from(sectionNode.querySelectorAll('.how-pill > span')), itemTitleLines);
+    }
+
+    if (sectionId === 'home_reviews') {
+        const reviewQuoteNode = sectionNode.querySelector('.testi-card p');
+        const reviewAuthorNode = sectionNode.querySelector('.testi-card h5');
+        if (reviewQuoteNode && itemDescriptionLines[0]) reviewQuoteNode.textContent = itemDescriptionLines[0];
+        if (reviewAuthorNode && itemTitleLines[0]) reviewAuthorNode.textContent = itemTitleLines[0];
+    }
+
+    if (sectionId === 'home_faqs') {
+        applyLineValuesToNodes(Array.from(sectionNode.querySelectorAll('.faq-accordion .faq-q-text')), itemTitleLines);
+        applyLineValuesToNodes(Array.from(sectionNode.querySelectorAll('.faq-accordion .accordion-body')), itemDescriptionLines);
+    }
+
+    if (itemLinkLines.length) {
+        const linkTargets = Array.from(sectionNode.querySelectorAll('a[data-builder-bind="href"], a.client-btn'));
+        linkTargets.forEach((node, index) => {
+            if (itemLinkLines[index]) node.setAttribute('href', itemLinkLines[index]);
+        });
     }
 };
 
@@ -379,17 +480,73 @@ const PreviewContent = () => {
         html.style.setProperty('--builder-button-bg', themePalette.buttonBg);
         html.style.setProperty('--builder-button-text', themePalette.buttonText);
 
+        // Preview-only: use full-width desktop canvas so page is not side-cut inside builder frame.
+        const previewFullWidthStyle = document.createElement('style');
+        previewFullWidthStyle.id = 'wb-preview-fullwidth-style';
+        previewFullWidthStyle.textContent = `
+          @media (min-width: 992px) {
+            .page-wrapper,
+            main,
+            section {
+              margin-left: 0 !important;
+              margin-right: 0 !important;
+              padding-left: 0 !important;
+              padding-right: 0 !important;
+            }
+
+            .container,
+            .container-sm,
+            .container-md,
+            .container-lg,
+            .container-xl,
+            .container-xxl {
+              max-width: 100% !important;
+              width: 100% !important;
+              margin-left: 0 !important;
+              margin-right: 0 !important;
+              padding-left: 0 !important;
+              padding-right: 0 !important;
+            }
+          }
+        `;
+        document.head.appendChild(previewFullWidthStyle);
+
+        // Preview-only: disable interactive navigation/actions inside iframe
+        body.setAttribute('data-ckam-builder-preview', '1');
+        const previewInteractionStyle = document.createElement('style');
+        previewInteractionStyle.id = 'wb-preview-interaction-style';
+        previewInteractionStyle.textContent = `
+          body[data-ckam-builder-preview="1"] a,
+          body[data-ckam-builder-preview="1"] button,
+          body[data-ckam-builder-preview="1"] [role="button"],
+          body[data-ckam-builder-preview="1"] input,
+          body[data-ckam-builder-preview="1"] select,
+          body[data-ckam-builder-preview="1"] textarea,
+          body[data-ckam-builder-preview="1"] summary,
+          body[data-ckam-builder-preview="1"] .dropdown-toggle,
+          body[data-ckam-builder-preview="1"] .navbar-toggler {
+            pointer-events: none !important;
+            cursor: default !important;
+          }
+        `;
+        document.head.appendChild(previewInteractionStyle);
+
         return () => {
             body.style.background = prevBackground;
             body.style.color = prevColor;
             body.style.overflow = prevOverflow;
             body.style.padding = prevPadding;
             body.style.margin = prevMargin;
+            body.removeAttribute('data-ckam-builder-preview');
             html.style.removeProperty('--builder-accent');
             html.style.removeProperty('--builder-text');
             html.style.removeProperty('--builder-bg');
             html.style.removeProperty('--builder-button-bg');
             html.style.removeProperty('--builder-button-text');
+            const injectedStyle = document.getElementById('wb-preview-fullwidth-style');
+            if (injectedStyle) injectedStyle.remove();
+            const interactionStyle = document.getElementById('wb-preview-interaction-style');
+            if (interactionStyle) interactionStyle.remove();
         };
     }, [builderMode, compactMode, themePalette]);
 

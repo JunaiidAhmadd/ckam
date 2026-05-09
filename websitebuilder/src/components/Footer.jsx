@@ -16,7 +16,7 @@ export default function Footer() {
       <img src="/assets/img/footer-shape-1.png" alt="" className="footer-shape-one" />
       <img src="/assets/img/footer-shape-2.png" alt="" className="footer-shape-two" />
       <div className="container">
-        <div className="row pt-100 pb-75">
+        <div className="row pt-100 pb-75 ckam-footer-row-compact">
           <div className="col-xl-4 col-lg-4 col-md-6 col-sm-6">
             <div className="footer-widget">
               <Link to="/" className="footer-logo">

@@ -67,15 +67,23 @@ const AdminLogin = () => {
                 password: credentials.password,
             });
 
-            if (payload?.two_factor_required) {
+            const requiresOtp = Boolean(
+                payload?.two_factor_required
+                || payload?.verification_required
+                || payload?.requires_otp
+                || payload?.two_step_verification?.verification_required
+            );
+
+            if (requiresOtp || !hasAdminToken()) {
                 setOtpState({
-                    email: credentials.email,
+                    email: credentials.email.trim(),
                     otp: '',
                     open: true,
                 });
                 return;
             }
 
+            await adminAuthApi.profile().catch(() => null);
             history.replace(nextUrl);
         } catch (submissionError) {
             setError(submissionError.message || 'Login failed.');
@@ -94,6 +102,10 @@ const AdminLogin = () => {
                 email: otpState.email,
                 otp: otpState.otp,
             });
+            await adminAuthApi.profile().catch(() => null);
+            if (!hasAdminToken()) {
+                throw new Error('Authorization token is required.');
+            }
             history.replace(nextUrl);
         } catch (submissionError) {
             setOtpError(submissionError.message || 'OTP verification failed.');

@@ -15,8 +15,8 @@ const Sidebar = ({ navCollapsed, toggleCollapsedNav }) => {
     const [activeMenu, setActiveMenu] = useState();
     const [activeSubMenu, setActiveSubMenu] = useState();
     const windowWidth = useWindowWidth();
-    const { locale } = useCkamAdmin();
-    const sidebarMenu = getSidebarMenu(locale);
+    const { locale, sitePages } = useCkamAdmin();
+    const sidebarMenu = getSidebarMenu(locale, sitePages);
 
     const handleClick = (menuName) => {
         setActiveMenu(menuName);

@@ -25,27 +25,52 @@ const authPageIcons = {
 const marketingPages = websiteBuilderPages.filter((page) => !['login', 'register', 'forgot-password', 'verify-email'].includes(page.slug));
 const authPages = websiteBuilderPages.filter((page) => ['login', 'register', 'forgot-password', 'verify-email'].includes(page.slug));
 
+const resolveWebsiteBuilderPages = (remotePages = []) => {
+    if (!Array.isArray(remotePages) || !remotePages.length) {
+        return websiteBuilderPages;
+    }
+
+    const localBySlug = new Map(websiteBuilderPages.map((page) => [page.slug, page]));
+    return remotePages
+        .filter((page) => page?.status === 'active')
+        .map((page) => {
+            const local = localBySlug.get(page.slug);
+            if (!local) return null;
+            return {
+                ...local,
+                label: {
+                    en: page?.title?.en || local.label.en,
+                    ar: page?.title?.ar || local.label.ar,
+                },
+            };
+        })
+        .filter(Boolean);
+};
+
 const buildPageLink = (page, locale, iconMap) => ({
     name: getLocalizedValue(page.label, locale),
     icon: iconMap[page.slug] || <Icons.FileText />,
     path: `/admin/website-builder/${page.slug}`,
 });
 
-export const getSidebarMenu = (locale = 'en') => {
+export const getSidebarMenu = (locale = 'en', remotePages = []) => {
     const copy = adminCopy[locale]?.sidebar || adminCopy.en.sidebar;
+    const resolvedPages = resolveWebsiteBuilderPages(remotePages);
+    const resolvedMarketingPages = resolvedPages.filter((page) => !['login', 'register', 'forgot-password', 'verify-email'].includes(page.slug));
+    const resolvedAuthPages = resolvedPages.filter((page) => ['login', 'register', 'forgot-password', 'verify-email'].includes(page.slug));
     const websiteBuilderGroups = [];
 
-    if (marketingPages.length) {
+    if (resolvedMarketingPages.length) {
         websiteBuilderGroups.push({
             group: `${copy.websiteBuilder}`,
-            contents: marketingPages.map((page) => buildPageLink(page, locale, marketingPageIcons)),
+            contents: resolvedMarketingPages.map((page) => buildPageLink(page, locale, marketingPageIcons)),
         });
     }
 
-    if (authPages.length) {
+    if (resolvedAuthPages.length) {
         websiteBuilderGroups.push({
             group: `${copy.websiteBuilder} - ${copy.authPages}`,
-            contents: authPages.map((page) => buildPageLink(page, locale, authPageIcons)),
+            contents: resolvedAuthPages.map((page) => buildPageLink(page, locale, authPageIcons)),
         });
     }
 

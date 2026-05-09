@@ -9,36 +9,38 @@ import "bootstrap/js/src/collapse";
 import ScrollToTop from './utils/ScrollToTop';
 
 function App() {
-  const hasToken = Boolean(getAdminToken());
+  const isAuthenticated = () => Boolean(getAdminToken());
 
   return (
     <>
       <ToastContainer position="top-right" autoClose={3000} theme="light" />
       <BrowserRouter>
-        <BrowserRouter >
-          <ScrollToTop>
-            <Switch>
-              <Redirect exact from="/" to={hasToken ? "/admin" : "/auth/login"} />
-              <Route
-                exact
-                path="/auth/login"
-                render={(props) => (hasToken ? <Redirect to="/admin" /> : <Login {...props} />)}
-              />
-              <Route
-                exact
-                path="/admin/login"
-                render={(props) => (hasToken ? <Redirect to="/admin" /> : <Login {...props} />)}
-              />
-              <Route path="/dashboard" render={() => <Redirect to="/admin" />} />
-              <Route path="/website-builder-preview/:pageSlug" component={WebsiteBuilderPreviewRouter} />
-              {/* Layouts */}
-              <Route
-                path="/"
-                render={(props) => (hasToken ? <AppRoutes {...props} /> : <Redirect to="/auth/login" />)}
-              />
-            </Switch>
-          </ScrollToTop>
-        </BrowserRouter>
+        <ScrollToTop>
+          <Switch>
+            <Route
+              exact
+              path="/"
+              render={() => <Redirect to={isAuthenticated() ? "/admin" : "/admin/login"} />}
+            />
+            <Route
+              exact
+              path="/auth/login"
+              render={() => <Redirect to="/admin/login" />}
+            />
+            <Route
+              exact
+              path="/admin/login"
+              render={(props) => (isAuthenticated() ? <Redirect to="/admin" /> : <Login {...props} />)}
+            />
+            <Route path="/dashboard" render={() => <Redirect to="/admin" />} />
+            <Route path="/website-builder-preview/:pageSlug" component={WebsiteBuilderPreviewRouter} />
+            {/* Layouts */}
+            <Route
+              path="/"
+              render={(props) => (isAuthenticated() ? <AppRoutes {...props} /> : <Redirect to="/admin/login" />)}
+            />
+          </Switch>
+        </ScrollToTop>
       </BrowserRouter>
     </>
   );

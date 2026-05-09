@@ -1,6 +1,7 @@
 import React, { useMemo, useRef, useState } from 'react';
 import { Button, Col, Form, Row } from 'react-bootstrap';
 import { Edit2, Trash2 } from 'react-feather';
+import { toast } from 'react-toastify';
 import { useCkamAdmin } from './context';
 import { adminCopy, getLocalizedValue, getStatusLabel } from './localization/i18n';
 import { MetricCard, normalizeTranslationLocale, SectionCard, StatusPill, TranslationViewSelect, useAdminPageSetup } from './shared';
@@ -11,14 +12,38 @@ const getBlankPost = () => ({
     title: { en: '', ar: '' },
     excerpt: { en: '', ar: '' },
     content: { en: '', ar: '' },
+    categoryId: '',
     category: '',
     author: 'C-KAM Editorial',
     readTime: '5 min read',
     imageUrl: '/assets/img/blog/blog-1.jpg',
-    status: 'draft',
+    imagePreviewUrl: '',
+    imageFile: null,
+    status: 'published',
     featured: false,
     publishedAt: new Date().toISOString().slice(0, 10),
 });
+
+const resolveBlogImageUrl = (value = '') => {
+    const raw = String(value || '').trim();
+    if (!raw) return '';
+    if (/^(https?:)?\/\//i.test(raw) || raw.startsWith('data:') || raw.startsWith('blob:')) {
+        return raw;
+    }
+
+    const normalizedPath = raw.startsWith('/') ? raw : `/${raw}`;
+    const apiBase = String(import.meta.env.VITE_API_BASE_URL || '').trim();
+    if (apiBase) {
+        try {
+            const { origin } = new URL(apiBase);
+            return `${origin}${normalizedPath}`;
+        } catch {
+            // Ignore parse errors and fall back to local path.
+        }
+    }
+
+    return normalizedPath;
+};
 
 const TINYMCE_SCRIPT_ID = 'ckam-tinymce-script';
 const TINYMCE_SCRIPT_SRC = 'https://cdn.tiny.cloud/1/59tfa9du2nj9f2vknfej0bmxhctmfjh34keva1mouvizl8af/tinymce/6/tinymce.min.js';
@@ -107,7 +132,7 @@ const BlogContentEditor = ({ localeKey, value, onChange, isRtl }) => {
 const BlogManagement = () => {
     useAdminPageSetup();
 
-    const { locale, blogPosts, saveBlogPost, deleteBlogPost } = useCkamAdmin();
+    const { locale, blogPosts, blogCategories, saveBlogPost, deleteBlogPost } = useCkamAdmin();
     const copy = adminCopy[locale];
     const pageCopy = copy.blogsPage;
     const commonCopy = copy.common;
@@ -117,6 +142,7 @@ const BlogManagement = () => {
     const [isEditing, setIsEditing] = useState(false);
     const [activeView, setActiveView] = useState('list');
     const [selectedPostId, setSelectedPostId] = useState(null);
+    const [saving, setSaving] = useState(false);
 
     const isArabicForm = translationLocale === 'ar';
     const labelAlignClass = isArabicForm ? 'text-end d-block' : 'text-start d-block';
@@ -131,6 +157,8 @@ const BlogManagement = () => {
             [
                 post.slug,
                 post.category,
+                post.categoryLabel?.en,
+                post.categoryLabel?.ar,
                 post.author,
                 getLocalizedValue(post.title, 'en'),
                 getLocalizedValue(post.title, 'ar'),
@@ -153,9 +181,12 @@ const BlogManagement = () => {
     const openEditForm = (post) => {
         setFormState({
             ...post,
+            categoryId: String(post.categoryId || post.siteBlogCategoryId || ''),
             title: { en: post.title?.en || '', ar: post.title?.ar || '' },
             excerpt: { en: post.excerpt?.en || '', ar: post.excerpt?.ar || '' },
             content: { en: post.content?.en || '', ar: post.content?.ar || '' },
+            imagePreviewUrl: '',
+            imageFile: null,
         });
         setTranslationLocale(normalizeTranslationLocale(locale));
         setIsEditing(true);
@@ -181,14 +212,45 @@ const BlogManagement = () => {
         }));
     };
 
-    const handleSubmit = (event) => {
+    const handleSubmit = async (event) => {
         event.preventDefault();
-        const slug = formState.slug?.trim() || getLocalizedValue(formState.title, 'en')
+        if (saving) return;
+
+        const hasNewImageFile = formState.imageFile instanceof File;
+        if (!hasNewImageFile && String(formState.imageUrl || '').startsWith('data:')) {
+            toast.error('Please use image URL/path, not base64 image data.');
+            return;
+        }
+        if (!hasNewImageFile && String(formState.imageUrl || '').length > 255) {
+            toast.error('Featured image must be 255 characters or fewer.');
+            return;
+        }
+
+        const baseTitle = getLocalizedValue(formState.title, 'en') || getLocalizedValue(formState.title, 'ar');
+        const generatedSlug = String(baseTitle || '')
             .toLowerCase()
             .replace(/[^a-z0-9]+/g, '-')
             .replace(/(^-|-$)/g, '');
+        const slug = formState.slug?.trim() || generatedSlug || `blog-${Date.now()}`;
 
-        saveBlogPost({ ...formState, slug });
+        const selectedCategory = blogCategories.find((category) => String(category.id) === String(formState.categoryId));
+        setSaving(true);
+        const result = await saveBlogPost({
+            ...formState,
+            slug,
+            categoryId: formState.categoryId,
+            featured_image: hasNewImageFile ? formState.imageFile : formState.imageUrl,
+            categoryNameEn: selectedCategory?.name?.en || '',
+            categoryNameAr: selectedCategory?.name?.ar || '',
+        });
+        setSaving(false);
+
+        if (!result?.ok) {
+            toast.error(result?.error || 'Blog save failed.');
+            return;
+        }
+
+        toast.success(isEditing ? pageCopy.updatePost : pageCopy.createPost);
         setIsEditing(false);
         setActiveView('list');
         setFormState(getBlankPost());
@@ -197,11 +259,12 @@ const BlogManagement = () => {
     const handleImageUpload = (event) => {
         const file = event.target.files?.[0];
         if (!file) return;
-        const reader = new FileReader();
-        reader.onload = () => {
-            handleChange('imageUrl', String(reader.result || ''));
-        };
-        reader.readAsDataURL(file);
+        setFormState((current) => ({
+            ...current,
+            imageFile: file,
+            imagePreviewUrl: URL.createObjectURL(file),
+        }));
+        toast.info('New image selected. It will be uploaded when you save.');
     };
 
     const selectedPost = blogPosts.find((post) => post.id === selectedPostId) || null;
@@ -266,7 +329,18 @@ const BlogManagement = () => {
                                 </Col>
                                 <Col md={6}>
                                     <Form.Label>{pageCopy.category}</Form.Label>
-                                    <Form.Control value={formState.category} onChange={(event) => handleChange('category', event.target.value)} required />
+                                    <Form.Select
+                                        value={formState.categoryId || ''}
+                                        onChange={(event) => handleChange('categoryId', event.target.value)}
+                                        required
+                                    >
+                                        <option value="">{locale === 'ar' ? 'اختر التصنيف' : 'Select category'}</option>
+                                        {blogCategories.map((category) => (
+                                            <option key={category.id} value={category.id}>
+                                                {getLocalizedValue(category.name, locale)}
+                                            </option>
+                                        ))}
+                                    </Form.Select>
                                 </Col>
                                 <Col md={6}>
                                     <Form.Label>{pageCopy.author}</Form.Label>
@@ -284,9 +358,13 @@ const BlogManagement = () => {
                                     <Form.Label>{pageCopy.imageUpload}</Form.Label>
                                     <Form.Control type="file" accept="image/*" onChange={handleImageUpload} />
                                 </Col>
-                                {!!formState.imageUrl && (
+                                {!!(formState.imagePreviewUrl || formState.imageUrl) && (
                                     <Col md={12}>
-                                        <img src={formState.imageUrl} alt="Blog preview" style={{ maxWidth: '240px', borderRadius: '10px', border: '1px solid #E5E7EB' }} />
+                                        <img
+                                            src={formState.imagePreviewUrl || resolveBlogImageUrl(formState.imageUrl)}
+                                            alt="Blog preview"
+                                            style={{ maxWidth: '240px', borderRadius: '10px', border: '1px solid #E5E7EB' }}
+                                        />
                                     </Col>
                                 )}
                                 <Col md={6}>
@@ -310,8 +388,10 @@ const BlogManagement = () => {
                                     />
                                 </Col>
                                 <Col md={12} className="d-flex gap-2">
-                                    <Button type="submit" variant="primary">{isEditing ? pageCopy.updatePost : pageCopy.createPost}</Button>
-                                    <Button type="button" variant="outline-light" onClick={openCreateForm}>{pageCopy.resetForm}</Button>
+                                    <Button type="submit" variant="primary" disabled={saving}>
+                                        {saving ? 'Saving...' : (isEditing ? pageCopy.updatePost : pageCopy.createPost)}
+                                    </Button>
+                                    <Button type="button" variant="outline-light" onClick={openCreateForm} disabled={saving}>{pageCopy.resetForm}</Button>
                                 </Col>
                             </Row>
                         </Form>
@@ -332,7 +412,7 @@ const BlogManagement = () => {
                         <Row className="g-3">
                             <Col md={12}>
                                 {!!selectedPost.imageUrl && (
-                                    <img src={selectedPost.imageUrl} alt={getLocalizedValue(selectedPost.title, locale)} style={{ width: '100%', maxHeight: '340px', objectFit: 'cover', borderRadius: '12px' }} />
+                                    <img src={resolveBlogImageUrl(selectedPost.imageUrl)} alt={getLocalizedValue(selectedPost.title, locale)} style={{ width: '100%', maxHeight: '340px', objectFit: 'cover', borderRadius: '12px' }} />
                                 )}
                             </Col>
                             <Col md={12}>
@@ -391,7 +471,7 @@ const BlogManagement = () => {
                                             </button>
                                             <div className="fs-8 text-muted">/{post.slug}</div>
                                         </td>
-                                        <td>{post.category}</td>
+                                        <td>{getLocalizedValue(post.categoryLabel, locale) || post.category}</td>
                                         <td>{post.author}</td>
                                         <td><StatusPill label={getStatusLabel(post.status, locale)} tone={post.status} /></td>
                                         <td>{post.publishedAt}</td>
@@ -400,7 +480,18 @@ const BlogManagement = () => {
                                                 <Button variant="outline-light" size="sm" onClick={() => openEditForm(post)}>
                                                     <span className="d-inline-flex align-items-center gap-2"><Edit2 size={14} />{pageCopy.edit}</span>
                                                 </Button>
-                                                <Button variant="outline-danger" size="sm" onClick={() => deleteBlogPost(post.id)}>
+                                                <Button
+                                                    variant="outline-danger"
+                                                    size="sm"
+                                                    onClick={async () => {
+                                                        const result = await deleteBlogPost(post.id);
+                                                        if (!result?.ok) {
+                                                            toast.error(result?.error || 'Delete failed.');
+                                                            return;
+                                                        }
+                                                        toast.success(pageCopy.delete);
+                                                    }}
+                                                >
                                                     <span className="d-inline-flex align-items-center gap-2"><Trash2 size={14} />{pageCopy.delete}</span>
                                                 </Button>
                                             </div>
@@ -422,3 +513,4 @@ const BlogManagement = () => {
 };
 
 export default BlogManagement;
+

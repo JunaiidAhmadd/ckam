@@ -19,12 +19,36 @@ const normalizeList = (value) => {
 
 const listToText = (value) => normalizeList(value).join('\n');
 
+const isHexColor = (value) => /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(String(value || '').trim());
+
 const getFieldValueForLocale = (field, locale) => {
   if (!field.localized) return field.value;
 
   const localizedValue = ensureLocalizedValue(field.value, '');
   if (field.type === 'list') {
     return normalizeList(localizedValue[locale]);
+  }
+
+  if (field.type === 'color') {
+    const rawValue = String(field.value ?? '').trim();
+    const swatchValue = isHexColor(rawValue) ? rawValue : '#000000';
+    return (
+      <div className="d-flex align-items-center gap-2">
+        <Form.Control
+          type="color"
+          value={swatchValue}
+          onChange={(event) => onChange(event.target.value)}
+          style={{ width: 56, minWidth: 56 }}
+        />
+        <Form.Control
+          type="text"
+          value={rawValue}
+          dir="ltr"
+          placeholder="#FB7A3C"
+          onChange={(event) => onChange(event.target.value)}
+        />
+      </div>
+    );
   }
 
   return String(localizedValue[locale] ?? '');
@@ -216,4 +240,3 @@ const BuilderFieldRenderer = ({
 };
 
 export default BuilderFieldRenderer;
-

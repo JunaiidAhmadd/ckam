@@ -5,6 +5,15 @@ import sass from 'sass';
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
+  server: {
+    proxy: {
+      '/api': {
+        target: 'https://apickam.cyphersol.com',
+        changeOrigin: true,
+        secure: true,
+      },
+    },
+  },
   css: {
     preprocessorOptions: {
       scss: {

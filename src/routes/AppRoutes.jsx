@@ -29,7 +29,7 @@ const AppRoutes = (props) => {
     const hasToken = Boolean(getAdminToken());
 
     if (!hasToken) {
-        return <Redirect to="/auth/login" />;
+        return <Redirect to="/admin/login" />;
     }
 
     return (

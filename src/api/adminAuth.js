@@ -8,12 +8,13 @@ import {
 
 const requestJson = async (path, options = {}) => {
   const token = options.skipAuth ? '' : getAdminToken();
+  const isFormData = options.body instanceof FormData;
 
   const response = await fetch(buildApiUrl(path), {
     method: options.method || 'GET',
     headers: {
       Accept: 'application/json',
-      ...(options.isFormData ? {} : { 'Content-Type': 'application/json' }),
+      ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...(options.headers || {}),
     },
@@ -27,6 +28,15 @@ const requestJson = async (path, options = {}) => {
       : '';
     const message = validationMessage || payload?.message || `API request failed: ${response.status}`;
     throw new Error(message);
+  }
+
+  const hasBooleanStatus = typeof payload?.status === 'boolean';
+  const hasStringStatus = typeof payload?.status === 'string';
+  if (
+    (hasBooleanStatus && payload.status !== true) ||
+    (hasStringStatus && ['error', 'failed', 'failure', 'false'].includes(payload.status.toLowerCase()))
+  ) {
+    throw new Error(payload?.message || 'Request failed.');
   }
 
   return payload;
@@ -94,6 +104,39 @@ export const adminAuthApi = {
     method: 'PUT',
     body: JSON.stringify(updates),
   }),
+
+  updatePublicProfileFormData: async (payload) => {
+    const formData = new FormData();
+    const appendIfPresent = (key, value) => {
+      if (value === undefined || value === null) return;
+      const raw = typeof value === 'string' ? value : String(value);
+      if (!raw.trim()) return;
+      formData.append(key, raw);
+    };
+
+    appendIfPresent('first_name', payload?.first_name);
+    appendIfPresent('last_name', payload?.last_name);
+    appendIfPresent('role', payload?.role);
+    appendIfPresent('location', payload?.location);
+    appendIfPresent('bio', payload?.bio);
+    appendIfPresent('personal_website', payload?.personal_website);
+    if (payload?.image instanceof File) {
+      formData.append('image', payload.image);
+    }
+
+    try {
+      return await requestJson(API_ENDPOINTS.auth.publicProfile, {
+        method: 'PUT',
+        body: formData,
+      });
+    } catch {
+      formData.append('_method', 'PUT');
+      return requestJson(API_ENDPOINTS.auth.publicProfile, {
+        method: 'POST',
+        body: formData,
+      });
+    }
+  },
 
   updateAccountSettings: async (updates) => requestJson(API_ENDPOINTS.auth.accountSettings, {
     method: 'PUT',

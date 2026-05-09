@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+﻿import React, { useMemo, useState } from 'react';
 import { Button, Col, Form, Row } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { useCkamAdmin } from './context';
@@ -13,6 +13,11 @@ const Photographers = () => {
     const common = adminCopy[locale].common;
     const [filter, setFilter] = useState('all');
     const [searchTerm, setSearchTerm] = useState('');
+    const cleanText = (value) => String(value || '')
+        .replace(/\uFFFD/g, '')
+        .replace(/â€¢/g, '•')
+        .replace(/^[^A-Za-z0-9\u0600-\u06FF]+/g, '')
+        .trim();
 
     const filteredPhotographers = useMemo(() => photographers.filter((photographer) => {
         const matchesFilter = filter === 'all' ? true : photographer.accountStatus === filter;
@@ -103,7 +108,11 @@ const Photographers = () => {
                                             <Link to={`/admin/photographers/${photographer.id}`} className="fw-medium text-dark text-decoration-none">
                                                 {photographer.name}
                                             </Link>
-                                            <div className="fs-8 text-muted">{photographer.city} � {photographer.specialty}</div>
+                                            <div className="fs-8 text-muted">
+                                                {cleanText(photographer.city)}
+                                                {cleanText(photographer.city) && cleanText(photographer.specialty) ? ' • ' : ''}
+                                                {cleanText(photographer.specialty)}
+                                            </div>
                                         </td>
                                         <td>
                                             <div className="fw-medium">{getLocalizedValue(photographer.planName, locale)}</div>
@@ -150,10 +159,3 @@ const Photographers = () => {
 };
 
 export default Photographers;
-
-
-
-
-
-
-

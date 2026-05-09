@@ -15,7 +15,7 @@ const formatRangeLabel = (startDate, endDate) => `${startDate.format('M/D hh:mm 
 const Dashboard = () => {
     useAdminPageSetup();
 
-    const { locale, photographers, revenueTimeline, waitlist, updateWaitlistStatus } = useCkamAdmin();
+    const { locale, photographers, revenueTimeline, waitlist, updateWaitlistStatus, dashboardData } = useCkamAdmin();
     const copy = adminCopy[locale].dashboard;
     const common = adminCopy[locale].common;
 
@@ -24,13 +24,15 @@ const Dashboard = () => {
     const [selectedView, setSelectedView] = useState('all');
     const [dateRangeLabel, setDateRangeLabel] = useState(formatRangeLabel(initialStartDate, initialEndDate));
 
-    const totalPhotographers = photographers.length;
-    const activeSubscriptions = photographers.filter((item) => item.subscriptionStatus === 'active').length;
-    const monthlyRevenue = photographers.reduce((total, item) => total + item.monthlyRevenue, 0);
-    const waitingApprovals = photographers.filter((item) => item.accountStatus === 'waiting').length;
+    const totalPhotographers = dashboardData?.total_photographers ?? photographers.length;
+    const activeSubscriptions = dashboardData?.active_subscriptions ?? photographers.filter((item) => item.subscriptionStatus === 'active').length;
+    const monthlyRevenue = Array.isArray(dashboardData?.current_month_revenue)
+        ? dashboardData.current_month_revenue.reduce((total, item) => total + Number(item?.amount || 0), 0)
+        : photographers.reduce((total, item) => total + item.monthlyRevenue, 0);
+    const waitingApprovals = dashboardData?.waiting_list_count ?? photographers.filter((item) => item.accountStatus === 'waiting').length;
 
     const tapCounts = {
-        connected: photographers.filter((item) => item.tapStatus === 'connected').length,
+        connected: dashboardData?.tap_connected ?? photographers.filter((item) => item.tapStatus === 'connected').length,
         pending: photographers.filter((item) => item.tapStatus === 'pending').length,
         notStarted: photographers.filter((item) => item.tapStatus === 'not-started').length,
     };
@@ -43,7 +45,16 @@ const Dashboard = () => {
     };
 
     const maxRevenue = Math.max(...revenueTimeline.map((item) => item.amount));
-    const actionQueue = photographers.filter((item) => item.accountStatus !== 'active' || item.tapStatus !== 'connected');
+    const actionQueue = dashboardData?.recent_photographers?.length
+        ? dashboardData.recent_photographers.map((item) => ({
+            id: item.photographer_id ? `p-${item.photographer_id}` : `u-${item.user_id}`,
+            name: item.name || 'Photographer',
+            city: item.studio_name || '-',
+            specialty: '',
+            accountStatus: item.is_active ? 'active' : 'deactivated',
+            tapStatus: item.tap_onboarding_status === 'active' ? 'connected' : item.tap_onboarding_status === 'not_started' ? 'not-started' : 'pending',
+        }))
+        : photographers.filter((item) => item.accountStatus !== 'active' || item.tapStatus !== 'connected');
 
     useEffect(() => {
         window.dispatchEvent(new Event('resize'));
@@ -340,7 +351,7 @@ const Dashboard = () => {
                         </SectionCard>
 
                         <SectionCard title={copy.operationsTitle} subtitle={copy.operationsSubtitle}>
-                            <div className="d-flex flex-column gap-3">
+                            <div className="ckam-operations-queue d-flex flex-column gap-3">
                                 {actionQueue.map((photographer) => (
                                     <div key={photographer.id} className="border rounded-3 p-3">
                                         <div className="d-flex justify-content-between align-items-start mb-2 gap-2">
@@ -367,8 +378,5 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
-
-
-
 
 

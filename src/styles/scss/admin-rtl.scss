@@ -497,6 +497,18 @@ html[dir='rtl'] .ckam-plan-modal .tab-pane[dir='rtl'] textarea {
   color: var(--ckam-accent-dark);
 }
 
+.ckam-dashboard-page .ckam-operations-queue {
+  max-height: 640px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 0.25rem;
+}
+
+html[dir='rtl'] .ckam-dashboard-page .ckam-operations-queue {
+  padding-right: 0;
+  padding-left: 0.25rem;
+}
+
 .ckam-admin-daterangepicker {
   background: #262b31;
   border: 1px solid rgba(255, 138, 69, 0.55);
@@ -867,6 +879,23 @@ html[dir='rtl'] .hk-wrapper .hk-menu .menu-content-wrap .menu-group .navbar-nav 
 html[dir='rtl'] .hk-wrapper .hk-menu .menu-content-wrap .menu-group .navbar-nav .nav-item .nav-link .nav-icon-wrap {
   margin-left: 0;
   margin-right: 0.875rem;
+}
+
+/* Keep RTL sidebar alignment stable: text right, icon on right, consistent spacing */
+html[dir='rtl'] .hk-wrapper .hk-menu .menu-content-wrap .menu-group .menu-title {
+  text-align: right;
+}
+
+html[dir='rtl'] .hk-wrapper .hk-menu .menu-content-wrap .menu-group .navbar-nav .nav-item .nav-link {
+  direction: rtl;
+  flex-direction: row;
+  justify-content: flex-start;
+  text-align: right;
+}
+
+html[dir='rtl'] .hk-wrapper .hk-menu .menu-content-wrap .menu-group .navbar-nav .nav-item .nav-link .nav-icon-wrap {
+  margin-right: 0;
+  margin-left: 0.875rem;
 }
 
 .ckam-language-dropdown .ckam-language-toggle,

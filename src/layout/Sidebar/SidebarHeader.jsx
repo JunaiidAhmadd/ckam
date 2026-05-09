@@ -2,7 +2,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { toggleCollapsedNav } from '../../redux/action/Theme';
 import { Link } from 'react-router-dom';
-import { ArrowBarToLeft } from 'tabler-icons-react';
+import { ArrowBarToLeft, ArrowBarToRight } from 'tabler-icons-react';
 import { Button } from 'react-bootstrap';
 import { useTheme } from '../../utils/theme-provider/theme-provider';
 import { brandAssets } from '../../utils/branding';
@@ -28,7 +28,7 @@ const SidebarHeader = ({ navCollapsed, toggleCollapsedNav }) => {
                 <Button id="tggl-btn" variant="flush-dark" onClick={toggleSidebar} className="btn-icon btn-rounded flush-soft-hover navbar-toggle sidebar-toggle-btn">
                     <span className="icon">
                         <span className="svg-icon fs-5">
-                            <ArrowBarToLeft />
+                            {navCollapsed ? <ArrowBarToRight /> : <ArrowBarToLeft />}
                         </span>
                     </span>
                 </Button>

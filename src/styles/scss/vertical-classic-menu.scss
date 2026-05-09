@@ -5,7 +5,7 @@ Project:	Jampack
 /**Vertical Navigation**/
 .hk-wrapper[data-layout="vertical"] {
 	.hk-pg-wrapper {
-		@include transition(all 0.2s ease);
+		@include transition(margin-left 0.28s ease);
 	}
 
 	.hk-menu {
@@ -21,7 +21,8 @@ Project:	Jampack
 		z-index: 1032;
 		border-right: 1px solid var(--hk-menu-border); // <-- THEMED
 		background: var(--hk-menu-bg); // <-- THEMED
-		@include transition(all 0.2s ease);
+		@include transition(left 0.28s ease, width 0.28s ease);
+		will-change: left, width;
 
 		>.nicescroll-bar {
 			overflow: auto;
@@ -279,15 +280,25 @@ Project:	Jampack
 				left: 72px;
 			}
 
-			.hk-menu {
-				width: 72px;
+		.hk-menu {
+			width: 72px;
 
-				// added for hide toggle button in react version
-				.menu-header {
-					.navbar-toggle {
-						filter: blur(100px);
-					}
+			// keep only the toggle visible in collapsed state
+			.menu-header {
+				justify-content: center;
+
+				>span {
+					justify-content: center;
 				}
+
+				.navbar-brand {
+					display: none;
+				}
+
+				.navbar-toggle {
+					filter: none;
+				}
+			}
 
 				.menu-content-wrap {
 					>.callout {
@@ -301,8 +312,10 @@ Project:	Jampack
 
 						.navbar-nav>.nav-item>.nav-link {
 							>*:not(.nav-icon-wrap) {
+								opacity: 0;
 								visibility: hidden;
 								flex-shrink: 0;
+								@include transition(opacity 0.2s ease);
 							}
 
 							&[data-bs-toggle="collapse"]::after {
@@ -333,9 +346,12 @@ Project:	Jampack
 				}
 
 				.navbar-toggle {
-					@include transform(rotate(180deg));
+					@include transform(none);
+					opacity: 1 !important;
+					visibility: visible !important;
+					display: inline-flex !important;
 				}
-			}
+		}
 
 			&[data-hover="active"] {
 				.hk-menu:hover {
@@ -362,6 +378,7 @@ Project:	Jampack
 
 							.navbar-nav>.nav-item>.nav-link {
 								>*:not(.nav-icon-wrap) {
+									opacity: 1;
 									visibility: visible;
 								}
 
@@ -383,7 +400,11 @@ Project:	Jampack
 
 					.menu-header {
 						>span {
+							justify-content: space-between;
+
 							.navbar-brand {
+								display: inline-flex;
+
 								.brand-img {
 									&:last-child {
 										display: inline;

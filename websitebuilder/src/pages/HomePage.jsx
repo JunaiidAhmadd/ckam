@@ -86,7 +86,8 @@ export default function HomePage() {
   }, []);
 
   const nextIconClass = useMemo(() => (isRtl ? 'ri-arrow-left-s-line' : 'ri-arrow-right-s-line'), [isRtl]);
-  const prevIconClass = useMemo(() => (isRtl ? 'ri-arrow-right-s-line' : 'ri-arrow-left-s-line'), [isRtl]);
+  const nextArrowSymbol = useMemo(() => (isRtl ? '←' : '→'), [isRtl]);
+  const prevArrowSymbol = useMemo(() => (isRtl ? '→' : '←'), [isRtl]);
 
   const moveTestimonial = (direction) => {
     setActiveTestimonialIndex((prev) => {
@@ -99,28 +100,30 @@ export default function HomePage() {
 
   return (
     <main className="client-sections">
-      <section className="client-block" data-builder-section="hero">
+      <section className="client-block" data-builder-section="home_hero">
         <div className="container">
           <div className="growth-card">
-            <div className="growth-media" />
+            <div className="growth-media" data-builder-field="image" data-builder-bind="bg-image" />
             <div className="growth-outline" />
             <div className="growth-content">
               <h1 className="growth-title" data-builder-field="title">{t('index.sections.growth.title', 'Your destination to grow your business')}</h1>
-              <ul className="growth-points">
+              <ul className="growth-points" data-builder-field="itemsTitles">
                 <li>{t('index.sections.growth.point_1', 'Client database')}</li>
                 <li>{t('index.sections.growth.point_2', 'Account management')}</li>
                 <li>{t('index.sections.growth.point_3', 'Online payments')}</li>
                 <li>{t('index.sections.growth.point_4', 'Client gallery')}</li>
               </ul>
-              <a href="https://ckam-photographer.cyphersol.com/auth/login" className="client-btn" data-builder-field="primaryButtonText" data-builder-bind="text" data-builder-button="primary">
-                {t('index.sections.growth.cta', 'Subscribe for free now')}
+              <a href="https://ckam-photographer.cyphersol.com/auth/login" className="client-btn" data-builder-field="buttonLink" data-builder-bind="href" data-builder-button="primary">
+                <span data-builder-field="buttonText" data-builder-bind="text">
+                  {t('index.sections.growth.cta', 'Subscribe for free now')}
+                </span>
               </a>
             </div>
           </div>
         </div>
       </section>
 
-      <section className="client-block pt-0" data-builder-section="growth">
+      <section className="client-block pt-0" data-builder-section="home_provide">
         <div className="container">
           <h2 className="provide-title" data-builder-field="title">{t('index.sections.provide.title', 'What do we provide?')}</h2>
           <div className="provide-wrap">
@@ -192,7 +195,7 @@ export default function HomePage() {
                     <span className="provide-arrow">
                       <i className={nextIconClass} />
                     </span>
-                    <span>{t(option.key, 'Service option')}</span>
+                    <span className="provide-item-label">{t(option.key, 'Service option')}</span>
                     <i className={option.icon} />
                   </button>
                 </li>
@@ -202,10 +205,10 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="how-wrap" data-builder-section="services">
+      <section className="how-wrap" data-builder-section="home_help">
         <div className="container">
           <h2 className="how-title" data-builder-field="title">{t('index.sections.how.title', 'How can C-KAM help you?')}</h2>
-          <p className="how-subtitle" data-builder-field="subtitle">{t('index.sections.how.subtitle', 'Our goal is to help you create a smooth and premium experience for you and your clients.')}</p>
+          <p className="how-subtitle" data-builder-field="description">{t('index.sections.how.subtitle', 'Our goal is to help you create a smooth and premium experience for you and your clients.')}</p>
           <div className="how-grid">
             <div className="how-pill"><span>{t('index.sections.how.card_1', 'Start selling while focused on clients')}</span><i className="ri-lightbulb-flash-line" /></div>
             <div className="how-pill"><span>{t('index.sections.how.card_2', 'Protect your rights and client payment rights')}</span><i className="ri-bank-card-line" /></div>
@@ -214,56 +217,64 @@ export default function HomePage() {
             <div className="how-pill"><span>{t('index.sections.how.card_5', 'Track costs and study your profits')}</span><i className="ri-money-dollar-circle-line" /></div>
             <div className="how-pill"><span>{t('index.sections.how.card_6', 'Get more time for creativity')}</span><i className="ri-line-chart-line" /></div>
           </div>
-          <Link to="/features" className="client-btn" data-builder-field="primaryButtonText" data-builder-bind="text" data-builder-button="primary">{t('index.sections.how.more', 'More')}</Link>
+          <Link to="/features" className="client-btn" data-builder-field="buttonLink" data-builder-bind="href" data-builder-button="primary">
+            <span data-builder-field="buttonText" data-builder-bind="text">{t('index.sections.how.more', 'More')}</span>
+          </Link>
         </div>
       </section>
 
-      <section className="client-block" data-builder-section="faq">
+      <section className="client-block">
         <div className="container">
-          <h2 className="testi-title" data-builder-field="title">{t('index.sections.testimonials.title', 'Subscriber Reviews')}</h2>
-          <div className="testi-frame">
-            <div className="testi-card">
-              <p>{t(testimonialItems[activeTestimonialIndex].quote, '')}</p>
-              <h5>{t(testimonialItems[activeTestimonialIndex].author, '')}</h5>
+          <div data-builder-section="home_reviews">
+            <h2 className="testi-title" data-builder-field="title">{t('index.sections.testimonials.title', 'Subscriber Reviews')}</h2>
+            <div className="testi-frame">
+              <div className="testi-card">
+                <p>{t(testimonialItems[activeTestimonialIndex].quote, '')}</p>
+                <h5>{t(testimonialItems[activeTestimonialIndex].author, '')}</h5>
+              </div>
+              <button className="testi-nav prev" type="button" onClick={() => moveTestimonial(-1)}>
+                <span aria-hidden="true">{prevArrowSymbol}</span>
+              </button>
+              <button className="testi-nav next" type="button" onClick={() => moveTestimonial(1)}>
+                <span aria-hidden="true">{nextArrowSymbol}</span>
+              </button>
             </div>
-            <button className="testi-nav prev" type="button" onClick={() => moveTestimonial(-1)}>
-              <i className={prevIconClass} />
-            </button>
-            <button className="testi-nav next" type="button" onClick={() => moveTestimonial(1)}>
-              <i className={nextIconClass} />
-            </button>
-          </div>
-          <div className="testi-line" />
-          <div className="testi-cta">
-            <a href="https://ckam-photographer.cyphersol.com/auth/login" className="client-btn" data-builder-field="primaryButtonText" data-builder-bind="text" data-builder-button="primary">{t('index.sections.testimonials.cta', 'Subscribe for free now')}</a>
+            <div className="testi-line" />
+            <div className="testi-cta">
+              <a href="https://ckam-photographer.cyphersol.com/auth/login" className="client-btn" data-builder-field="buttonLink" data-builder-bind="href" data-builder-button="primary">
+                <span data-builder-field="buttonText" data-builder-bind="text">{t('index.sections.testimonials.cta', 'Subscribe for free now')}</span>
+              </a>
+            </div>
           </div>
 
-          <div className="faq-divider" />
-          <h2 className="faq-title">{t('index.sections.faq.title', 'Frequently Asked Questions')}</h2>
-          <div className="faq-drop"><i className="ri-arrow-down-s-line" /></div>
-          <div className="faq-wrap">
-            <div className="accordion faq-accordion">
-              {faqItems.map((item, index) => {
-                const expanded = activeFaqIndex === index;
-                return (
-                  <div className="accordion-item" key={item.question}>
-                    <h3 className="accordion-header">
-                      <button
-                        className={`accordion-button ${expanded ? '' : 'collapsed'}`}
-                        type="button"
-                        aria-expanded={expanded}
-                        onClick={() => setActiveFaqIndex((prev) => (prev === index ? -1 : index))}
-                      >
-                        <span className="faq-q-text">{t(item.question, '')}</span>
-                        <span className="faq-toggle-icon" aria-hidden="true"><i className="ri-add-line" /></span>
-                      </button>
-                    </h3>
-                    <div className={`accordion-collapse collapse ${expanded ? 'show' : ''}`}>
-                      <div className="accordion-body">{t(item.answer, '')}</div>
+          <div data-builder-section="home_faqs">
+            <div className="faq-divider" />
+            <h2 className="faq-title" data-builder-field="title">{t('index.sections.faq.title', 'Frequently Asked Questions')}</h2>
+            <div className="faq-drop"><i className="ri-arrow-down-s-line" /></div>
+            <div className="faq-wrap">
+              <div className="accordion faq-accordion">
+                {faqItems.map((item, index) => {
+                  const expanded = activeFaqIndex === index;
+                  return (
+                    <div className="accordion-item" key={item.question}>
+                      <h3 className="accordion-header">
+                        <button
+                          className={`accordion-button ${expanded ? '' : 'collapsed'}`}
+                          type="button"
+                          aria-expanded={expanded}
+                          onClick={() => setActiveFaqIndex((prev) => (prev === index ? -1 : index))}
+                        >
+                          <span className="faq-q-text">{t(item.question, '')}</span>
+                          <span className="faq-toggle-icon" aria-hidden="true"><i className="ri-add-line" /></span>
+                        </button>
+                      </h3>
+                      <div className={`accordion-collapse collapse ${expanded ? 'show' : ''}`}>
+                        <div className="accordion-body">{t(item.answer, '')}</div>
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
             </div>
           </div>
         </div>

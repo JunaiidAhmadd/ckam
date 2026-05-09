@@ -73,7 +73,7 @@ const Login = (props) => {
                         <Col xl={5} lg={6} md={7} className="position-relative mx-auto">
                             <div className="auth-content flex-column pt-8 pb-md-8 pb-13">
                                 <div className="text-center mb-7">
-                                    <Link to="/auth/login" className="navbar-brand me-0">
+                                    <Link to="/admin/login" className="navbar-brand me-0">
                                         <img src="/assets/img/logo.png" alt="CKAM logo" className="brand-img d-inline-block" />
                                     </Link>
                                 </div>
