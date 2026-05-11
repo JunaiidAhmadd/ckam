@@ -4,6 +4,7 @@ import { useI18n } from '../context/I18nContext.jsx';
 import LanguageSwitcher from './LanguageSwitcher.jsx';
 
 const AUTH_URL = 'https://ckam-photographer.cyphersol.com/auth/login';
+const PHOTOGRAPHER_PORTAL_URL = 'https://ckam-photographer.cyphersol.com';
 
 const navItems = [
   { to: '/', key: 'header.nav.home', label: 'Home' },
@@ -90,8 +91,13 @@ export default function Header() {
 
             <div className="other-options">
               <div className="option-item">
-                <a href={AUTH_URL} className="btn style1 btn-outline btn-login">
+                <a href={AUTH_URL} className="btn style1 btn-outline btn-login" data-element="loginLabel">
                   {t('header.nav.login', 'Login')}
+                </a>
+              </div>
+              <div className="option-item">
+                <a href={PHOTOGRAPHER_PORTAL_URL} className="btn style1 photographer-portal-btn" data-element="photographerPortalLabel">
+                  {t('header.nav.photographer_portal', 'Photographer Portal')}
                 </a>
               </div>
               <div className="option-item">
