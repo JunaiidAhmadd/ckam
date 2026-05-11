@@ -17,7 +17,7 @@
     "icons"
   ],
   "scripts": {
-    "start": "npm run docs-serve",
+    "start": "node init && npm run docs-serve",
     "docs-serve": "hugo server --port 4000 --disableFastRender",
     "docs-build": "hugo --cleanDestinationDir",
     "docs-purge": "npm run docs-build && purgecss --css docs/static/assets/css/bootstrap.min.css --content \"_site/**/*.html\" \"_site/assets/js/**/*.js\" --keyframes --output docs/static/assets/css/",

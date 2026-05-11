@@ -6,6 +6,7 @@ import PricingPage from './pages/PricingPage.jsx';
 import BlogsPage from './pages/BlogsPage.jsx';
 import SingleBlogPage from './pages/SingleBlogPage.jsx';
 import ContactPage from './pages/ContactPage.jsx';
+import AboutPage from './pages/AboutPage.jsx';
 import TermsPage from './pages/TermsPage.jsx';
 import PrivacyPage from './pages/PrivacyPage.jsx';
 import BookingPage from './pages/BookingPage.jsx';
@@ -22,6 +23,7 @@ export default function App() {
         <Route path="blogs/:slug" element={<SingleBlogPage />} />
         <Route path="single-blog" element={<SingleBlogPage />} />
         <Route path="contact" element={<ContactPage />} />
+        <Route path="about" element={<AboutPage />} />
         <Route path="terms-of-service" element={<TermsPage />} />
         <Route path="privacy-policy" element={<PrivacyPage />} />
         <Route path="booking" element={<BookingPage />} />
