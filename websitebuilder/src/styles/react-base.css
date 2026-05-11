@@ -17,6 +17,26 @@ body:not(.theme-dark) .navbar-brand .logo-light {
   display: block !important;
 }
 
+/* Keep uploaded header logos from breaking navbar layout */
+.header-wrap .navbar .navbar-brand img,
+.header-wrap .navbar .navbar-brand .logo-light,
+.header-wrap .navbar .navbar-brand .logo-dark {
+  display: block;
+  width: auto !important;
+  max-width: clamp(120px, 18vw, 220px);
+  max-height: 54px;
+  object-fit: contain;
+}
+
+@media only screen and (max-width: 991px) {
+  .header-wrap .navbar .navbar-brand img,
+  .header-wrap .navbar .navbar-brand .logo-light,
+  .header-wrap .navbar .navbar-brand .logo-dark {
+    max-width: min(46vw, 170px);
+    max-height: 44px;
+  }
+}
+
 /* Keep header behavior consistent with template sticky flow */
 .header-wrap.style1.sticky {
   z-index: 1200;

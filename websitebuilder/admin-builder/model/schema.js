@@ -293,6 +293,7 @@ export const builderSchema = {
     createPage('home', 'Home Page', 'Home Page', sectionsFromIds(['hero', 'growth', 'services', 'faq'])),
     createPage('features', 'Features Page', 'Features Page', sectionsFromIds(['hero', 'feature-grid', 'workflow', 'fields-extra', 'difference-extra', 'cta'])),
     createPage('contact', 'Contact Page', 'Contact Page', sectionsFromIds(['hero', 'contact-info', 'form'])),
+    createPage('about', 'About Page', 'About Page', sectionsFromIds(['hero', 'content'])),
     createPage('booking', 'Booking Page', 'Booking Page', sectionsFromIds(['hero', 'gallery-extra', 'services', 'about-extra', 'booking-form', 'reviews'])),
     createPage('blogs', 'Blogs Page', 'Blogs Page', sectionsFromIds(['hero', 'categories', 'blog-grid', 'newsletter'])),
     createPage('single-blog', 'Single Blog Page', 'Single Blog Page', sectionsFromIds(['hero', 'content', 'sidebar', 'related'])),

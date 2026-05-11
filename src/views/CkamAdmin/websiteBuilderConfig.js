@@ -127,6 +127,22 @@ export const websiteBuilderPages = [
     ],
   },
   {
+    slug: 'about',
+    file: 'websitebuilder/src/pages/AboutPage.jsx',
+    routePath: '/about',
+    label: b('About Page', 'About Page'),
+    summary: b(
+      'Manage company introduction, story, and trust-building content.',
+      'Manage company introduction, story, and trust-building content.'
+    ),
+    primaryCta: b('Learn More', 'Learn More'),
+    secondaryCta: b('Contact Us', 'Contact Us'),
+    sections: [
+      { key: 'hero', label: b('Hero Banner', 'Hero Banner') },
+      { key: 'content', label: b('About Content', 'About Content') },
+    ],
+  },
+  {
     slug: 'booking',
     file: 'websitebuilder/src/pages/BookingPage.jsx',
     routePath: '/booking',

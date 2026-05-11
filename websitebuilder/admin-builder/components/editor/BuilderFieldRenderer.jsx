@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Form } from 'react-bootstrap';
 import { ensureLocalizedValue, getLocalizedValue, isLocalizedValue } from '../../model/schema';
 
@@ -85,10 +85,17 @@ const BuilderFieldRenderer = ({
   uiLocale = 'en',
   onChange,
 }) => {
+  const [localImagePreview, setLocalImagePreview] = useState('');
   const isArabicInput = locale === 'ar';
   const inputDir = isArabicInput ? 'rtl' : 'ltr';
   const activeValue = getFieldValueForLocale(field, locale);
   const placeholder = getLocalizedValue(field.placeholder, uiLocale, '');
+
+  useEffect(() => () => {
+    if (localImagePreview?.startsWith('blob:')) {
+      URL.revokeObjectURL(localImagePreview);
+    }
+  }, [localImagePreview]);
 
   if (field.type === 'toggle' || field.type === 'boolean' || field.type === 'checkbox') {
     const checked = Boolean(field.value);
@@ -185,12 +192,20 @@ const BuilderFieldRenderer = ({
       ? getLocalizedValue(field.value, locale, '')
       : String(field.value || '');
 
-    const handleImageValue = (nextValue) => {
+    const setFieldImageValue = (nextValue) => {
       if (field.localized || isLocalizedValue(field.value)) {
         updateLocalizedField(field, locale, nextValue, onChange);
         return;
       }
       onChange(nextValue);
+    };
+
+    const handleImageValue = (nextValue) => {
+      if (localImagePreview?.startsWith('blob:')) {
+        URL.revokeObjectURL(localImagePreview);
+      }
+      setLocalImagePreview('');
+      setFieldImageValue(nextValue);
     };
 
     return (
@@ -207,15 +222,34 @@ const BuilderFieldRenderer = ({
           onChange={(event) => {
             const file = event.target.files?.[0];
             if (!file) return;
+            if (localImagePreview?.startsWith('blob:')) {
+              URL.revokeObjectURL(localImagePreview);
+            }
+            const objectUrl = URL.createObjectURL(file);
+            setLocalImagePreview(objectUrl);
             const reader = new FileReader();
-            reader.onload = () => handleImageValue(String(reader.result || ''));
+            reader.onload = () => {
+              const fileDataUrl = typeof reader.result === 'string' ? reader.result : '';
+              if (fileDataUrl) {
+                setFieldImageValue(fileDataUrl);
+              } else {
+                setFieldImageValue(objectUrl);
+              }
+            };
+            reader.onerror = () => {
+              setFieldImageValue(objectUrl);
+            };
             reader.readAsDataURL(file);
+            event.target.value = '';
           }}
         />
-        {imageValue ? (
+        <Form.Text className="text-muted">
+          Selected file will be uploaded when you click Save. You can also paste a hosted image URL or server path.
+        </Form.Text>
+        {(localImagePreview || imageValue) ? (
           <div style={{ border: '1px solid #e5e7eb', borderRadius: 10, overflow: 'hidden' }}>
             <img
-              src={imageValue}
+              src={localImagePreview || imageValue}
               alt={getLocalizedValue(field.label, uiLocale, field.key)}
               style={{ width: '100%', maxHeight: 170, objectFit: 'cover' }}
             />
