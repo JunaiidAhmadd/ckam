@@ -11,6 +11,7 @@ const marketingPageIcons = {
     'single-blog': <Icons.Article />,
     booking: <Icons.CalendarEvent />,
     contact: <Icons.Mail />,
+    about: <Icons.InfoCircle />,
     'terms-of-service': <Icons.FileText />,
     'privacy-policy': <Icons.Lock />,
 };
@@ -31,7 +32,7 @@ const resolveWebsiteBuilderPages = (remotePages = []) => {
     }
 
     const localBySlug = new Map(websiteBuilderPages.map((page) => [page.slug, page]));
-    return remotePages
+    const resolvedRemote = remotePages
         .filter((page) => page?.status === 'active')
         .map((page) => {
             const local = localBySlug.get(page.slug);
@@ -45,6 +46,14 @@ const resolveWebsiteBuilderPages = (remotePages = []) => {
             };
         })
         .filter(Boolean);
+
+    const headerFooterLocal = localBySlug.get('header-footer');
+    if (!headerFooterLocal) return resolvedRemote;
+
+    const hasHeaderFooter = resolvedRemote.some((page) => page.slug === 'header-footer');
+    if (hasHeaderFooter) return resolvedRemote;
+
+    return [headerFooterLocal, ...resolvedRemote];
 };
 
 const buildPageLink = (page, locale, iconMap) => ({

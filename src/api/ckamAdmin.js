@@ -111,9 +111,132 @@ const normalizeFeaturedImage = (value) => {
 };
 
 const isFileLike = (value) => (
-  typeof File !== 'undefined'
-  && value instanceof File
+  (typeof File !== 'undefined' && value instanceof File)
+  || (typeof Blob !== 'undefined' && value instanceof Blob)
 );
+
+const isDataUrl = (value) => (
+  typeof value === 'string'
+  && String(value).trim().toLowerCase().startsWith('data:')
+);
+
+const MIME_EXTENSION_MAP = {
+  'image/jpeg': 'jpg',
+  'image/jpg': 'jpg',
+  'image/png': 'png',
+  'image/gif': 'gif',
+  'image/webp': 'webp',
+  'image/svg+xml': 'svg',
+  'image/bmp': 'bmp',
+  'image/x-icon': 'ico',
+  'image/vnd.microsoft.icon': 'ico',
+};
+
+const sanitizeFilenameKey = (key = 'upload') => String(key || 'upload')
+  .replace(/\[[^\]]*\]/g, '_')
+  .replace(/[^a-zA-Z0-9._-]+/g, '_')
+  .replace(/^_+|_+$/g, '')
+  || 'upload';
+
+const extensionFromMime = (mimeType = '') => {
+  const normalized = String(mimeType || '').trim().toLowerCase();
+  if (MIME_EXTENSION_MAP[normalized]) return MIME_EXTENSION_MAP[normalized];
+
+  const fallback = normalized.split('/')[1] || 'bin';
+  return fallback.replace(/[^a-z0-9]+/g, '') || 'bin';
+};
+
+const dataUrlToBlobWithFilename = (value, key) => {
+  const raw = String(value || '').trim();
+  if (!raw) return null;
+
+  const commaIndex = raw.indexOf(',');
+  if (!raw.startsWith('data:') || commaIndex <= 5) return null;
+
+  const meta = raw.slice(5, commaIndex);
+  const payload = raw.slice(commaIndex + 1);
+  const metaParts = meta.split(';').filter(Boolean);
+  const mimeType = metaParts[0] || 'application/octet-stream';
+  const isBase64Payload = metaParts.some((part) => part.toLowerCase() === 'base64');
+
+  let blob = null;
+  if (isBase64Payload) {
+    try {
+      const decoded = atob(payload);
+      const bytes = new Uint8Array(decoded.length);
+      for (let index = 0; index < decoded.length; index += 1) {
+        bytes[index] = decoded.charCodeAt(index);
+      }
+      blob = new Blob([bytes], { type: mimeType });
+    } catch {
+      return null;
+    }
+  } else {
+    try {
+      blob = new Blob([decodeURIComponent(payload)], { type: mimeType });
+    } catch {
+      return null;
+    }
+  }
+
+  const extension = extensionFromMime(mimeType);
+  const filename = `${sanitizeFilenameKey(key)}.${extension}`;
+  return { blob, filename };
+};
+
+const appendCmsFormDataValue = (formData, key, value) => {
+  if (value === undefined || value === null) return;
+
+  if (isFileLike(value)) {
+    formData.append(key, value);
+    return;
+  }
+
+  if (isDataUrl(value)) {
+    const converted = dataUrlToBlobWithFilename(value, key);
+    if (converted?.blob) {
+      formData.append(key, converted.blob, converted.filename);
+      return;
+    }
+  }
+
+  if (Array.isArray(value)) {
+    value.forEach((entry, index) => appendCmsFormDataValue(formData, `${key}[${index}]`, entry));
+    return;
+  }
+
+  if (typeof value === 'object') {
+    Object.entries(value).forEach(([childKey, childValue]) => {
+      appendCmsFormDataValue(formData, `${key}[${childKey}]`, childValue);
+    });
+    return;
+  }
+
+  formData.append(key, String(value));
+};
+
+const payloadHasUploadableData = (value) => {
+  if (value === undefined || value === null) return false;
+  if (isFileLike(value) || isDataUrl(value)) return true;
+
+  if (Array.isArray(value)) {
+    return value.some((entry) => payloadHasUploadableData(entry));
+  }
+
+  if (typeof value === 'object') {
+    return Object.values(value).some((entry) => payloadHasUploadableData(entry));
+  }
+
+  return false;
+};
+
+const buildCmsFormData = (payload = {}) => {
+  const formData = new FormData();
+  Object.entries(payload || {}).forEach(([key, value]) => {
+    appendCmsFormDataValue(formData, key, value);
+  });
+  return formData;
+};
 
 const appendFormDataValue = (formData, key, value) => {
   if (value === undefined || value === null) return;
@@ -334,11 +457,62 @@ export const ckamApi = {
     body: JSON.stringify(payload),
   }),
   getSitePages: () => requestJson(API_ENDPOINTS.ckamAdmin.sitePages, { method: 'GET' }),
+  getSitePage: (slug) => requestJson(API_ENDPOINTS.ckamAdmin.sitePage(slug), { method: 'GET' }),
   getSitePageEdit: (slug) => requestJson(API_ENDPOINTS.ckamAdmin.sitePageEdit(slug), { method: 'GET' }),
-  updateSitePage: (slug, payload) => requestJson(API_ENDPOINTS.ckamAdmin.sitePage(slug), {
-    method: 'PUT',
-    body: JSON.stringify(payload),
-  }),
+  updateSiteHeader: async (payload) => {
+    if (payloadHasUploadableData(payload)) {
+      const formData = buildCmsFormData(payload);
+      formData.append('_method', 'PUT');
+      return requestJson(API_ENDPOINTS.ckamAdmin.siteHeader, {
+        method: 'POST',
+        body: formData,
+      });
+    }
+
+    return requestJson(API_ENDPOINTS.ckamAdmin.siteHeader, {
+      method: 'PUT',
+      body: JSON.stringify(payload),
+    });
+  },
+  getSiteHeaderEdit: () => requestJson(API_ENDPOINTS.ckamAdmin.siteHeaderEdit, { method: 'GET' }),
+  updateSiteFooter: async (payload) => {
+    if (payloadHasUploadableData(payload)) {
+      const formData = buildCmsFormData(payload);
+      formData.append('_method', 'PUT');
+      return requestJson(API_ENDPOINTS.ckamAdmin.siteFooter, {
+        method: 'POST',
+        body: formData,
+      });
+    }
+
+    return requestJson(API_ENDPOINTS.ckamAdmin.siteFooter, {
+      method: 'PUT',
+      body: JSON.stringify(payload),
+    });
+  },
+  getSiteFooterEdit: () => requestJson(API_ENDPOINTS.ckamAdmin.siteFooterEdit, { method: 'GET' }),
+  updateSitePage: async (slug, payload) => {
+    if (payloadHasUploadableData(payload)) {
+      const formData = buildCmsFormData(payload);
+      formData.append('_method', 'PUT');
+      return requestJson(API_ENDPOINTS.ckamAdmin.sitePage(slug), {
+        method: 'POST',
+        body: formData,
+      });
+    }
+
+    try {
+      return await requestJson(API_ENDPOINTS.ckamAdmin.sitePage(slug), {
+        method: 'PUT',
+        body: JSON.stringify(payload),
+      });
+    } catch {
+      return requestJson(API_ENDPOINTS.ckamAdmin.sitePage(slug), {
+        method: 'POST',
+        body: JSON.stringify({ ...payload, _method: 'PUT' }),
+      });
+    }
+  },
 
   saveBlogPost: (payload) => {
     const isUpdate = Boolean(payload?.id);

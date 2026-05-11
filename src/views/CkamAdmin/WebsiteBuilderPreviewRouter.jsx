@@ -9,6 +9,7 @@ import BookingPage from '../../../websitebuilder/src/pages/BookingPage.jsx';
 import ContactPage from '../../../websitebuilder/src/pages/ContactPage.jsx';
 import FeaturesPage from '../../../websitebuilder/src/pages/FeaturesPage.jsx';
 import HomePage from '../../../websitebuilder/src/pages/HomePage.jsx';
+import AboutPage from '../../../websitebuilder/src/pages/AboutPage.jsx';
 import PlaceholderPage from '../../../websitebuilder/src/pages/PlaceholderPage.jsx';
 import PricingPage from '../../../websitebuilder/src/pages/PricingPage.jsx';
 import PrivacyPage from '../../../websitebuilder/src/pages/PrivacyPage.jsx';
@@ -30,6 +31,7 @@ const previewPageMap = {
     blogs: BlogsPage,
     'single-blog': SingleBlogPage,
     contact: ContactPage,
+    about: AboutPage,
     booking: BookingPage,
     'terms-of-service': TermsPage,
     'privacy-policy': PrivacyPage,
@@ -264,6 +266,341 @@ const applyHighlightsToLists = (sectionNode, lines) => {
     for (let i = lines.length; i < allItems.length; i += 1) {
         allItems[i].textContent = '';
     }
+};
+
+const getGlobalSectionById = (globalNode, sectionId, fallbackIndex = 0) => {
+    const sections = Array.isArray(globalNode?.sections) ? globalNode.sections : [];
+    return sections.find((section) => section?.id === sectionId) || sections[fallbackIndex] || null;
+};
+
+const getSectionFieldValue = (section, key, locale = 'en', fallback = '') => {
+    const field = (section?.fields || []).find((item) => item?.key === key);
+    if (!field) return fallback;
+    return getLocalizedValue(field?.value, locale, fallback);
+};
+
+const toBool = (value, fallback = true) => {
+    if (typeof value === 'boolean') return value;
+    if (value === null || value === undefined || value === '') return fallback;
+
+    const raw = String(value).trim().toLowerCase();
+    if (['1', 'true', 'yes', 'on'].includes(raw)) return true;
+    if (['0', 'false', 'no', 'off'].includes(raw)) return false;
+
+    const numeric = Number(raw);
+    if (Number.isFinite(numeric)) return numeric !== 0;
+    return fallback;
+};
+
+const toDisplayPosition = (value, fallback = 0) => {
+    const numeric = Number(value);
+    return Number.isFinite(numeric) ? numeric : fallback;
+};
+
+const toLines = (value) => builderValueToLines(value);
+
+const buildOrderedLinkItems = ({ titles, links, statuses, positions }) => {
+    const max = Math.max(titles.length, links.length, statuses.length, positions.length, 0);
+    return Array.from({ length: max })
+        .map((_, index) => ({
+            title: String(titles[index] || '').trim(),
+            link: String(links[index] || '').trim(),
+            show: toBool(statuses[index], true),
+            position: toDisplayPosition(positions[index], index + 1),
+        }))
+        .filter((item) => item.title || item.link)
+        .sort((a, b) => a.position - b.position);
+};
+
+const buildOrderedImageItems = ({ images, links, statuses, positions }) => {
+    const max = Math.max(images.length, links.length, statuses.length, positions.length, 0);
+    return Array.from({ length: max })
+        .map((_, index) => ({
+            image: String(images[index] || '').trim(),
+            link: String(links[index] || '#').trim() || '#',
+            show: toBool(statuses[index], true),
+            position: toDisplayPosition(positions[index], index + 1),
+        }))
+        .filter((item) => item.image)
+        .sort((a, b) => a.position - b.position);
+};
+
+const buildOrderedSocialItems = ({ platforms, icons, urls, statuses, positions }) => {
+    const max = Math.max(platforms.length, icons.length, urls.length, statuses.length, positions.length, 0);
+    return Array.from({ length: max })
+        .map((_, index) => {
+            const platform = String(platforms[index] || '').trim();
+            const icon = String(icons[index] || '').trim();
+            const url = String(urls[index] || '#').trim() || '#';
+            if (!platform && !icon && !url) return null;
+            return {
+                platform,
+                icon,
+                url,
+                show: toBool(statuses[index], true),
+                position: toDisplayPosition(positions[index], index + 1),
+            };
+        })
+        .filter(Boolean)
+        .sort((a, b) => a.position - b.position);
+};
+
+const ensureLinkList = (listNode, items) => {
+    if (!listNode) return;
+    const existingItems = Array.from(listNode.querySelectorAll(':scope > li'));
+
+    items.forEach((item, index) => {
+        const li = existingItems[index] || document.createElement('li');
+        if (!existingItems[index]) listNode.appendChild(li);
+
+        let link = li.querySelector('a');
+        if (!link) {
+            li.innerHTML = '';
+            link = document.createElement('a');
+            li.appendChild(link);
+        }
+
+        link.textContent = item.title || item.link || '';
+        if (item.link) link.setAttribute('href', item.link);
+        li.style.display = item.show ? '' : 'none';
+    });
+
+    existingItems.slice(items.length).forEach((node) => node.remove());
+};
+
+const ensureInstagramList = (galleryNode, items) => {
+    if (!galleryNode) return;
+    const existingItems = Array.from(galleryNode.querySelectorAll(':scope > a'));
+
+    items.forEach((item, index) => {
+        const anchor = existingItems[index] || document.createElement('a');
+        if (!existingItems[index]) galleryNode.appendChild(anchor);
+        anchor.setAttribute('href', item.link || '#');
+        anchor.style.display = item.show ? '' : 'none';
+
+        let image = anchor.querySelector('img');
+        if (!image) {
+            image = document.createElement('img');
+            anchor.appendChild(image);
+        }
+        image.setAttribute('src', item.image);
+        image.setAttribute('alt', '');
+    });
+
+    existingItems.slice(items.length).forEach((node) => node.remove());
+};
+
+const resolveSocialIconClass = (iconValue, platformValue) => {
+    const normalizedIcon = String(iconValue || '').trim().toLowerCase();
+    const normalizedPlatform = String(platformValue || '').trim().toLowerCase();
+
+    if (normalizedIcon.startsWith('ri-')) return normalizedIcon;
+
+    const known = {
+        facebook: 'ri-facebook-line',
+        twitter: 'ri-twitter-line',
+        x: 'ri-twitter-x-line',
+        instagram: 'ri-instagram-line',
+        linkedin: 'ri-linkedin-line',
+        youtube: 'ri-youtube-line',
+        tiktok: 'ri-tiktok-line',
+    };
+
+    return known[normalizedIcon] || known[normalizedPlatform] || 'ri-global-line';
+};
+
+const ensureSocialList = (listNode, items) => {
+    if (!listNode) return;
+    const existingItems = Array.from(listNode.querySelectorAll(':scope > li'));
+
+    items.forEach((item, index) => {
+        const li = existingItems[index] || document.createElement('li');
+        if (!existingItems[index]) listNode.appendChild(li);
+
+        let link = li.querySelector('a');
+        if (!link) {
+            li.innerHTML = '';
+            link = document.createElement('a');
+            link.setAttribute('target', '_blank');
+            link.setAttribute('rel', 'noreferrer');
+            li.appendChild(link);
+        }
+        link.setAttribute('href', item.url || '#');
+        link.setAttribute('aria-label', item.platform || 'Social link');
+
+        let iconNode = link.querySelector('i');
+        if (!iconNode) {
+            iconNode = document.createElement('i');
+            link.appendChild(iconNode);
+        }
+        iconNode.className = resolveSocialIconClass(item.icon, item.platform);
+        li.style.display = item.show ? '' : 'none';
+    });
+
+    existingItems.slice(items.length).forEach((node) => node.remove());
+};
+
+const ensureFooterLegalBlock = (footerNode) => {
+    if (!footerNode) return null;
+    const quickLinksWidget = footerNode.querySelector('.footer-menu')?.closest('.footer-widget');
+    if (!quickLinksWidget) return null;
+
+    let legalBlock = quickLinksWidget.querySelector('.ckam-footer-legal-block');
+    if (!legalBlock) {
+        legalBlock = document.createElement('div');
+        legalBlock.className = 'ckam-footer-legal-block mt-4';
+
+        const titleNode = document.createElement('h3');
+        titleNode.className = 'footer-widget-title';
+        titleNode.setAttribute('data-preview-footer', 'legal-title');
+
+        const listNode = document.createElement('ul');
+        listNode.className = 'footer-menu list-style ckam-footer-legal-menu';
+
+        legalBlock.appendChild(titleNode);
+        legalBlock.appendChild(listNode);
+        quickLinksWidget.appendChild(legalBlock);
+    }
+
+    return {
+        block: legalBlock,
+        titleNode: legalBlock.querySelector('[data-preview-footer="legal-title"]'),
+        listNode: legalBlock.querySelector('.ckam-footer-legal-menu'),
+    };
+};
+
+const applyFooterGlobalData = (footerNode, footerGlobalNode, locale = 'en') => {
+    if (!footerNode || !footerGlobalNode) return;
+
+    const footerMainSection = getGlobalSectionById(footerGlobalNode, 'footer-main', 0);
+    const footerLinksSection = getGlobalSectionById(footerGlobalNode, 'footer-links', 1);
+    const footerSocialSection = getGlobalSectionById(footerGlobalNode, 'footer-social', 2);
+    if (!footerMainSection) return;
+
+    footerNode.style.display = getSectionShow(footerMainSection) ? '' : 'none';
+    if (footerNode.style.display === 'none') return;
+
+    const footerLogo = String(getSectionFieldValue(footerMainSection, 'footerLogo', locale, '') || '').trim();
+    const brandName = String(getSectionFieldValue(footerMainSection, 'brandName', locale, '') || '').trim();
+    const description = String(getSectionFieldValue(footerMainSection, 'description', locale, '') || '').trim();
+    const newsletterPlaceholder = String(
+        getSectionFieldValue(footerMainSection, 'newsletterPlaceholder', locale, '')
+    ).trim();
+    const newsletterButtonText = String(
+        getSectionFieldValue(footerMainSection, 'newsletterButtonText', locale, '')
+    ).trim();
+    const quickLinksTitle = String(getSectionFieldValue(footerMainSection, 'quickLinksTitle', locale, '') || '').trim();
+    const legalTitle = String(getSectionFieldValue(footerMainSection, 'legalTitle', locale, '') || '').trim();
+    const instagramTitle = String(getSectionFieldValue(footerMainSection, 'instagramTitle', locale, '') || '').trim();
+    const contactTitle = String(getSectionFieldValue(footerMainSection, 'contactTitle', locale, '') || '').trim();
+    const location = String(getSectionFieldValue(footerMainSection, 'location', locale, '') || '').trim();
+    const phone = String(getSectionFieldValue(footerMainSection, 'phone', locale, '') || '').trim();
+    const email = String(getSectionFieldValue(footerMainSection, 'email', locale, '') || '').trim();
+    const copyright = String(getSectionFieldValue(footerMainSection, 'copyright', locale, '') || '').trim();
+
+    const showNewsletter = toBool(getSectionFieldValue(footerMainSection, 'showNewsletter', locale, true), true);
+    const showQuickLinks = toBool(getSectionFieldValue(footerMainSection, 'showQuickLinks', locale, true), true);
+    const showLegalLinks = toBool(getSectionFieldValue(footerMainSection, 'showLegalLinks', locale, true), true);
+    const showInstagram = toBool(getSectionFieldValue(footerMainSection, 'showInstagram', locale, true), true);
+    const showContactInfo = toBool(getSectionFieldValue(footerMainSection, 'showContactInfo', locale, true), true);
+    const showSocialLinksField = toBool(getSectionFieldValue(footerMainSection, 'showSocialLinks', locale, true), true);
+    const showSocialLinks = showSocialLinksField && getSectionShow(footerSocialSection);
+
+    const quickLinksItems = buildOrderedLinkItems({
+        titles: toLines(getSectionFieldValue(footerLinksSection, 'quickLinksTitles', locale, [])),
+        links: toLines(getSectionFieldValue(footerLinksSection, 'quickLinksLinks', locale, [])),
+        statuses: toLines(getSectionFieldValue(footerLinksSection, 'quickLinksStatuses', locale, [])),
+        positions: toLines(getSectionFieldValue(footerLinksSection, 'quickLinksPositions', locale, [])),
+    });
+    const legalLinksItems = buildOrderedLinkItems({
+        titles: toLines(getSectionFieldValue(footerLinksSection, 'legalLinksTitles', locale, [])),
+        links: toLines(getSectionFieldValue(footerLinksSection, 'legalLinksLinks', locale, [])),
+        statuses: toLines(getSectionFieldValue(footerLinksSection, 'legalLinksStatuses', locale, [])),
+        positions: toLines(getSectionFieldValue(footerLinksSection, 'legalLinksPositions', locale, [])),
+    });
+    const instagramItems = buildOrderedImageItems({
+        images: toLines(getSectionFieldValue(footerLinksSection, 'instagramImages', locale, [])),
+        links: toLines(getSectionFieldValue(footerLinksSection, 'instagramLinks', locale, [])),
+        statuses: toLines(getSectionFieldValue(footerLinksSection, 'instagramStatuses', locale, [])),
+        positions: toLines(getSectionFieldValue(footerLinksSection, 'instagramPositions', locale, [])),
+    });
+    const socialItems = buildOrderedSocialItems({
+        platforms: toLines(getSectionFieldValue(footerSocialSection, 'socialPlatforms', locale, [])),
+        icons: toLines(getSectionFieldValue(footerSocialSection, 'socialIcons', locale, [])),
+        urls: toLines(getSectionFieldValue(footerSocialSection, 'socialUrls', locale, [])),
+        statuses: toLines(getSectionFieldValue(footerSocialSection, 'socialStatuses', locale, [])),
+        positions: toLines(getSectionFieldValue(footerSocialSection, 'socialPositions', locale, [])),
+    });
+
+    const logoNode = footerNode.querySelector('.footer-logo img');
+    if (logoNode && footerLogo) {
+        logoNode.setAttribute('src', footerLogo);
+    }
+    if (logoNode && brandName) {
+        logoNode.setAttribute('alt', brandName);
+    }
+
+    setNodeText(footerNode.querySelector('.comp-desc'), description);
+    const newsletterInput = footerNode.querySelector('.newsletter-form input[type="email"]');
+    if (newsletterInput && newsletterPlaceholder) {
+        newsletterInput.setAttribute('placeholder', newsletterPlaceholder);
+    }
+    setNodeText(footerNode.querySelector('.newsletter-form button'), newsletterButtonText);
+
+    const quickLinksTitleNode = footerNode.querySelector('.footer-menu')?.closest('.footer-widget')?.querySelector('.footer-widget-title');
+    setNodeText(quickLinksTitleNode, quickLinksTitle);
+
+    const instagramTitleNode = footerNode.querySelector('.insta-gallery')?.closest('.footer-widget')?.querySelector('.footer-widget-title');
+    setNodeText(instagramTitleNode, instagramTitle);
+
+    const contactTitleNode = footerNode.querySelector('.contact-info')?.closest('.footer-widget')?.querySelector('.footer-widget-title');
+    setNodeText(contactTitleNode, contactTitle);
+
+    const contactAddressNode = footerNode.querySelector('.contact-info li:nth-child(1) p');
+    setNodeText(contactAddressNode, location);
+
+    const phoneNode = footerNode.querySelector('.contact-info li:nth-child(2) a');
+    setNodeText(phoneNode, phone);
+    if (phoneNode && phone) phoneNode.setAttribute('href', `tel:${phone.replace(/\s+/g, '')}`);
+
+    const emailNode = footerNode.querySelector('.contact-info li:nth-child(3) a');
+    setNodeText(emailNode, email);
+    if (emailNode && email) emailNode.setAttribute('href', `mailto:${email}`);
+
+    const copyrightNode = footerNode.querySelector('.copyright-text');
+    if (copyrightNode && copyright) {
+        copyrightNode.innerHTML = '';
+        const iconNode = document.createElement('i');
+        iconNode.className = 'ri-copyright-line';
+        copyrightNode.appendChild(iconNode);
+        copyrightNode.appendChild(document.createTextNode(` ${copyright}`));
+    } else if (!copyright && brandName) {
+        const brandNode = footerNode.querySelector('.copyright-text span');
+        if (brandNode) brandNode.textContent = brandName;
+    }
+
+    ensureLinkList(footerNode.querySelector('.footer-menu'), quickLinksItems);
+    ensureInstagramList(footerNode.querySelector('.insta-gallery'), instagramItems);
+    ensureSocialList(footerNode.querySelector('.social-profile'), socialItems);
+
+    const legalBlock = ensureFooterLegalBlock(footerNode);
+    if (legalBlock?.titleNode && legalTitle) {
+        legalBlock.titleNode.textContent = legalTitle;
+    }
+    ensureLinkList(legalBlock?.listNode, legalLinksItems);
+    setNodeDisplay(legalBlock?.block, showLegalLinks);
+
+    const newsletterBlock = footerNode.querySelector('.newsletter-form');
+    const socialBlock = footerNode.querySelector('.social-profile');
+    const quickLinksColumn = footerNode.querySelector('.footer-menu')?.closest('[class*="col-"]');
+    const instagramColumn = footerNode.querySelector('.insta-gallery')?.closest('[class*="col-"]');
+    const contactColumn = footerNode.querySelector('.contact-info')?.closest('[class*="col-"]');
+
+    setNodeDisplay(newsletterBlock, showNewsletter);
+    setNodeDisplay(socialBlock, showSocialLinks);
+    setNodeDisplay(quickLinksColumn, showQuickLinks);
+    setNodeDisplay(instagramColumn, showInstagram);
+    setNodeDisplay(contactColumn, showContactInfo);
 };
 
 const applySectionData = (sectionNode, sectionData, locale = 'en') => {
@@ -637,6 +974,11 @@ const PreviewContent = () => {
                         }
                     }
 
+                    const portalNode = headerNode.querySelector('.photographer-portal-btn, [data-element="photographerPortalLabel"]');
+                    if (portalNode && headerElements.photographerPortalLabel) {
+                        portalNode.textContent = headerElements.photographerPortalLabel;
+                    }
+
                     const navLabels = headerElements.navItems;
                     if (Array.isArray(navLabels) && navLabels.length) {
                         const navLinks = Array.from(headerNode.querySelectorAll('.navbar-nav .nav-link'));
@@ -648,8 +990,8 @@ const PreviewContent = () => {
                     }
                 }
 
-                if (footerNode && builderState.globals.footer?.sections?.[0]) {
-                    applySectionData(footerNode, builderState.globals.footer.sections[0], previewLocale);
+                if (footerNode && builderState.globals.footer) {
+                    applyFooterGlobalData(footerNode, builderState.globals.footer, previewLocale);
                 }
             }
 
@@ -657,12 +999,32 @@ const PreviewContent = () => {
             const selectedPage = builderState?.pages?.find((page) => page.id === pageSlug);
             if (selectedPage) {
                 const { indexedSectionNodes, sectionNodeById } = getPreviewSectionTargets(pageWrapper);
+                const sections = Array.isArray(selectedPage.sections) ? selectedPage.sections : [];
                 const appliedTargets = new Set();
+                const appliedSections = new Set();
 
-                (selectedPage.sections || []).forEach((sectionData, index) => {
-                    const targetNode = sectionNodeById.get(sectionData.id) || indexedSectionNodes[index];
+                // 1) First, bind sections that have an explicit DOM id match.
+                sections.forEach((sectionData, index) => {
+                    const sectionId = String(sectionData?.id || '').trim();
+                    if (!sectionId) return;
+                    const targetNode = sectionNodeById.get(sectionId);
                     if (!targetNode || appliedTargets.has(targetNode)) return;
                     appliedTargets.add(targetNode);
+                    appliedSections.add(index);
+                    applySectionData(targetNode, sectionData, previewLocale);
+                });
+
+                // 2) Then, bind the remaining sections by order as a fallback.
+                let fallbackCursor = 0;
+                sections.forEach((sectionData, index) => {
+                    if (appliedSections.has(index)) return;
+                    while (fallbackCursor < indexedSectionNodes.length && appliedTargets.has(indexedSectionNodes[fallbackCursor])) {
+                        fallbackCursor += 1;
+                    }
+                    const targetNode = indexedSectionNodes[fallbackCursor];
+                    if (!targetNode || appliedTargets.has(targetNode)) return;
+                    appliedTargets.add(targetNode);
+                    fallbackCursor += 1;
                     applySectionData(targetNode, sectionData, previewLocale);
                 });
             }

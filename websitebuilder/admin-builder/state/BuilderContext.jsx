@@ -4,7 +4,7 @@ import {
   builderSchema,
   cloneDeep,
 } from '../model/schema';
-import { normalizeBuilderStateData, normalizePage } from '../model/normalizers';
+import { normalizeBuilderStateData, normalizeGlobalNode, normalizePage } from '../model/normalizers';
 import { persistBuilderStateToStorage, readBuilderStateFromStorage } from '../model/storage';
 
 const pickFirstSectionId = (node) => node?.sections?.[0]?.id || '';
@@ -285,6 +285,24 @@ const reducer = (state, action) => {
     };
   }
 
+  if (action.type === 'APPLY_REMOTE_GLOBAL') {
+    const incomingGlobal = action?.global;
+    if (!incomingGlobal?.id) return state;
+
+    const currentGlobal = state.globals[incomingGlobal.id];
+    if (!currentGlobal) return state;
+
+    const mergedGlobal = normalizeGlobalNode(currentGlobal, incomingGlobal);
+
+    return {
+      ...state,
+      globals: {
+        ...state.globals,
+        [mergedGlobal.id]: mergedGlobal,
+      },
+    };
+  }
+
   return state;
 };
 
@@ -383,6 +401,10 @@ export const BuilderProvider = ({ children, routeSlug }) => {
       applyRemotePage: (page) => dispatch({
         type: 'APPLY_REMOTE_PAGE',
         page,
+      }),
+      applyRemoteGlobal: (global) => dispatch({
+        type: 'APPLY_REMOTE_GLOBAL',
+        global,
       }),
       save,
     };
